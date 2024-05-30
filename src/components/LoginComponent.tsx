@@ -3,66 +3,51 @@ import { User } from '../types/User';
 import { getDataAsync } from '../Utils';
 import config from '../Config';
 import { UserLoginParams } from '../dtos/UserLoginParams';
+import { LoginUserData } from '../dtos/LoginUserData';
 export interface LoginComponentProps{
-    onLoginSuccess:()=>User;
+    onLoginSuccess:(User:User)=>User;
     onRegister:()=>void;
+    userdata:User|null;
 };
 
-const LoginComponent:React.FC<LoginComponentProps>=()=>{
-    const [email,setEmail]=useState('');
-    const [password,setPassword]=useState('');
-   
-   
+const LoginComponent:React.FC<LoginComponentProps>=(props)=>{
+    const [email,setEmail]=useState('adriansan_93@yahoo.com');
+    const [password,setPassword]=useState('pwd1');
     const [loginFailMessage,setLoginFailMessage]=useState('');
 
-    async function getUserByIdAsync(Id:number):Promise<User|null>{
-        var url=`${config.baseHttpUrl}/get-user?id=${Id}`;
-        var result=await getDataAsync(url);
-        return result;
-    }
-    
-    async function getUserByEmailAsync():Promise<User|null>{
-        var url=`${config.baseHttpUrl}/get-user-by-email?email=${email}&password=${password}`;
+    async function getUserByEmailAsync(loginUserData:LoginUserData):Promise<User|null>{
+        var url=`${config.baseHttpUrl}/get-user-by-email?email=${loginUserData.email}&password=${loginUserData.password}`;
         var result=await getDataAsync(url);
         console.log(result);
         return result;
     
     }
-    async function performLoginAsync(user:User){
-        console.log("try login");
-        try {
-            console.log(user.id);
-            var userResult=await getUserByIdAsync(user.id);
-            if(userResult){
-                return;
-            }
-            console.log("Could not log in with the user ");
-           
-        } catch (error) {
-            console.log("Error at try login");
-            
-        }
-       
-    }
+
     const handleLogin=async()=>{
-        var user=getItemFromStorage<User>("user");
-    
-        if(!user){
-            setLoginFailMessage("Invalid user");
+        if(props.userdata){
+            props.onLoginSuccess(props.userdata);
+            console.log("credentials already provided");
             return;
         }
-        await performLoginAsync(user);
+        
+        var userResult=await getUserByEmailAsync({email:email,password:password});
+        if(!userResult){
+            setLoginFailMessage("Invalid user , please register first");
+        }
+        props.onLoginSuccess(userResult!);
+      
     };
+
     return(
     <div id="loginModal">
     <div id="loginPanel">
         <div style={{ alignSelf: 'center' }}>Login</div>
         <div className="formRow">
-            <input  id="emailLoginBox" type="text" value="adriansan_93@yahoo.com"/>
+            <input  id="emailLoginBox" type="text" value={email} onChange={(e)=>setEmail(e.target.value)}/>
             <label id="emailLoginLabel" className="subscribeLabel">Username</label>
         </div>
         <div className="formRow">
-            <input id="passwordLoginBox" type="text" value="333"/>
+            <input id="passwordLoginBox" type="text" value={password} onChange={(e)=>setPassword(e.target.value)}/>
             <label id="passwordLoginLabel" className="subscribeLabel">Password</label>
         </div>
         <div className="formRow">
@@ -70,8 +55,10 @@ const LoginComponent:React.FC<LoginComponentProps>=()=>{
             <button id="registerBtn">Register</button>
         </div>
         <div  className="formRow">
-            <p id="loginFailMessage" onChange={(e)=>setLoginFailMessage(e.target.value)}>{loginFailMessage}</p>
+            <p id="loginFailMessage">{loginFailMessage}</p>
         </div>
     </div>
 </div>);
 }
+
+export default LoginComponent;

@@ -1,28 +1,46 @@
-import React,{useState,FC} from "react";
+import React,{useState,FC, useEffect} from "react";
 import LoginComponent from "./LoginComponent";
 import { User } from "../types/User";
 import RegisterComponent from "./RegisterComponent";
+import { getItemFromStorage, setItemInStorage } from "../Utils";
+import MainComponent from "./MainComponent";
 export interface ParentComponentProps{
 
 };
 const ParentComponent:FC<ParentComponentProps>=(props)=>{
-    const [user,setUser]=useState(()=>{
-        
-    });
+    const [user,setUser]=useState<User|null>(null);
     const [showLogin,setShowLogin]=useState(true);
     const [showRegister,setShowRegister]=useState(false);
+    const [showMain,setShowMain]=useState(false);
+
+    useEffect(()=>{
+        const storedUser=getItemFromStorage<User>('user');
+        if(storedUser){
+            setUser(storedUser);
+        }
+    },[]);
     const handleShowLogin=()=>{
         setShowLogin(true);
         setShowRegister(false);
+        setShowMain(false);
     };
     const handleShowRegister=()=>{
         setShowRegister(true);
         setShowLogin(false);
+        setShowMain(false);
     };
-    const handleLoginSuccessful=(user:User):User=>{
-        return {email:"a",id:1,name:"sa"};
+    const handleShowMain=()=>{
+        setShowLogin(false);
+        setShowMain(true);
+    }
+    const handleLoginSuccessful=(user:User):void=>{
+        setUser(user);
+        setItemInStorage<User>('user',user);
+        handleShowMain();
     };
-    const handleRegisterSuccessful=(user:User)=>{
+    const handleRegisterSuccessful=(user:User):void=>{
+        setUser(user);
+        handleShowMain();
 
     }
     const handleBackToLogin=()=>{
@@ -31,15 +49,17 @@ const ParentComponent:FC<ParentComponentProps>=(props)=>{
     return(<>{showLogin && 
             <LoginComponent 
                     onRegister={handleShowRegister} 
-                    onLoginSuccess={(user)=>handleLoginSuccessful(user)}
-                    userdata={null}>
+                    onLoginSuccess={handleLoginSuccessful}
+                    userdata={user}>
             </LoginComponent>}
              {showRegister && 
              <RegisterComponent
                      onRegisterSuccess={handleRegisterSuccessful}
                      onBackToLogin={handleBackToLogin}>
-             </RegisterComponent>
-             }</>)
+             </RegisterComponent>}
+             {showMain &&
+             <MainComponent></MainComponent>}
+             </>);
 };
 
 export default ParentComponent;

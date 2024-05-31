@@ -5,7 +5,7 @@ import config from '../Config';
 import { UserLoginParams } from '../dtos/UserLoginParams';
 import { LoginUserData } from '../dtos/LoginUserData';
 export interface LoginComponentProps{
-    onLoginSuccess:(User:User)=>User;
+    onLoginSuccess:(User:User)=>void;
     onRegister:()=>void;
     userdata:User|null;
 };

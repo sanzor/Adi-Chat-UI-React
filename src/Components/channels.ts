@@ -1,10 +1,10 @@
-import { publishCommand, publishEvent, subscribeToEvent ,unsubscribeFromEvent} from "./bus";
-import { ChatMessage } from "./Domain/ChatMessage";
-import { Channel } from "./Domain/Channel";
-import{channelsContainer} from "./elements";
-import { setItemInStorage,getItemFromStorage } from "./utils";
-import {subscribeBtn,subscribeBox} from "./elements";
-import { KIND, SOCKET_COMMAND, CURRENT_CHANNEL} from "./constants";
+import { publishCommand, publishEvent, subscribeToEvent ,unsubscribeFromEvent} from "../bus";
+import { ChatMessage } from "../Domain/ChatMessage";
+import { Channel } from "../Domain/Channel";
+import{channelsContainer} from "../elements";
+import { setItemInStorage,getItemFromStorage } from "../Utils";
+import {subscribeBtn,subscribeBox} from "../elements";
+import { KIND, SOCKET_COMMAND, CURRENT_CHANNEL} from "../constants";
 import {
     REFRESH_CHANNELS_COMMAND_RESULT, 
     SUBSCRIBE_COMMAND_RESULT,
@@ -21,10 +21,10 @@ import {
     SET_CHANNELS,
     ADD_CHANNEL,
     REMOVE_CHANNEL,
-    CHANNEL_CLICK} from "./events";
-import { SubscribeCommand } from "./Domain/Commands/SubscribeCommand";
-import { SubscribeResult } from "./Domain/Responses/CommandResult/SubscribeResult";
-import { UnsubscribeResult } from "./Domain/Responses/CommandResult/UnsubscribeResult";
+    CHANNEL_CLICK} from "../events";
+import { SubscribeCommand } from "../Domain/Commands/SubscribeCommand";
+import { SubscribeResult } from "../Domain/Responses/CommandResult/SubscribeResult";
+import { UnsubscribeResult } from "../Domain/Responses/CommandResult/UnsubscribeResult";
 
 const CHANNELS="channels";
 

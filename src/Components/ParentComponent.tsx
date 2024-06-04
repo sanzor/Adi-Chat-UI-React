@@ -46,19 +46,22 @@ const ParentComponent:FC<ParentComponentProps>=(props)=>{
     const handleBackToLogin=()=>{
         handleShowLogin();
     }
+    const handleLogout=()=>{
+        handleShowLogin();
+    };
     return(<>{showLogin && 
             <LoginComponent 
                     onRegister={handleShowRegister} 
                     onLoginSuccess={handleLoginSuccessful}
-                    userdata={user}>
-            </LoginComponent>}
+                    userdata={user}/>
+           }
              {showRegister && 
              <RegisterComponent
                      onRegisterSuccess={handleRegisterSuccessful}
-                     onBackToLogin={handleBackToLogin}>
-             </RegisterComponent>}
+                     onBackToLogin={handleBackToLogin}/>
+             }
              {showMain &&
-             <MainComponent></MainComponent>}
+             <MainComponent onLogout={handleLogout}/>}
              </>);
 };
 

@@ -1,9 +1,10 @@
-import React, { Component, FC, useState } from 'react';
+import React, {  useState } from 'react';
 import { User } from '../types/User';
 import { getDataAsync } from '../Utils';
 import config from '../Config';
-import { UserLoginParams } from '../dtos/UserLoginParams';
 import { LoginUserData } from '../dtos/LoginUserData';
+import '../css/general.css';
+import '../css/specific.css';
 export interface LoginComponentProps{
     onLoginSuccess:(User:User)=>void;
     onRegister:()=>void;
@@ -22,7 +23,10 @@ const LoginComponent:React.FC<LoginComponentProps>=(props)=>{
         return result;
     
     }
-
+    const handleRegister=()=>{
+        setLoginFailMessage('');
+        props.onRegister();
+    }
     const handleLogin=async()=>{
         if(props.userdata){
             props.onLoginSuccess(props.userdata);
@@ -52,7 +56,7 @@ const LoginComponent:React.FC<LoginComponentProps>=(props)=>{
         </div>
         <div className="formRow">
             <button id="loginBtn" onClick={handleLogin}>Login</button>
-            <button id="registerBtn">Register</button>
+            <button id="registerBtn" onClick={handleRegister}>Register</button>
         </div>
         <div  className="formRow">
             <p id="loginFailMessage">{loginFailMessage}</p>

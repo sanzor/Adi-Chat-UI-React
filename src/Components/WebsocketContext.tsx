@@ -1,12 +1,14 @@
 import React, { createContext, useContext, useEffect, ReactNode, useCallback } from 'react';
-import { connect, closeSocket, sendCommand } from '../sock'; // Adjust the import path as needed
+import { connect, closeSocket, sendEvent } from './Websocket'; // Adjust the import path as needed
 import EventBus from './EventBus';
 import { Command } from '../Domain/Commands/Command';
 
 interface WebSocketContextType {
-  send: (command: Command) => void;
-  subscribe: (event: string, callback: (data: any) => void) => void;
-  unsubscribe: (event: string, callback: (data: any) => void) => void;
+  connect: () => void;
+  disconnect : ()=> void;
+  sendEvent: (command:Command) => Promise<void>;
+  subscribe:(event:string,callback:(data:any)=>void)=>void;
+  unsubscriibe:(event:string,callback:(data:any)=>void)=>void;
 }
 
 const WebSocketContext = createContext<WebSocketContextType | undefined>(undefined);
@@ -15,7 +17,7 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
 
 
   const send = useCallback((command: Command) => {
-    sendCommand(command);
+    sendEvent(command);
   }, []);
 
   const subscribe = useCallback((event: string, callback: (data: any) => void) => {
@@ -26,6 +28,11 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
     EventBus.unsubscribe(event, callback);
   }, []);
 
+  const sendEventWebsocket=useCallback((event:Event,callback:(data:any)=>void)=>{
+    
+  },[]);
+
+  
   return (
     <WebSocketContext.Provider value={{ send, subscribe, unsubscribe }}>
       {children}

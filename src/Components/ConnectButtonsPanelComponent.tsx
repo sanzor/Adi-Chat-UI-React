@@ -1,5 +1,5 @@
 import { reduceEachTrailingCommentRange } from "typescript";
-import { connect } from "../sock";
+import { connect } from "./Websocket";
 
 export interface ConnectButtonsPanelComponentProps{
     onConnectSuccesful():void;

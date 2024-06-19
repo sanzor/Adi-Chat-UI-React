@@ -1,23 +1,28 @@
+import { eventNames } from "process";
+import { Command } from "../Domain/Commands/Command";
+
 type EventCallback = (data: any) => void;
 
 class EventBus {
-  private events: { [key: string]: EventCallback[] } = {};
-
+  private eventBus: EventTarget;
+  constructor(){
+    this.eventBus=new EventTarget();
+  }
   subscribe(event: string, callback: EventCallback) {
-    if (!this.events[event]) {
-      this.events[event] = [];
-    }
-    this.events[event].push(callback);
+    this.eventBus.addEventListener(event,callback as EventListener);
   }
 
   unsubscribe(event: string, callback: EventCallback) {
-    if (!this.events[event]) return;
-    this.events[event] = this.events[event].filter((cb) => cb !== callback);
+    this.eventBus.removeEventListener(event,callback as EventListener);
   }
 
-  publish(event: string, data: any) {
-    if (!this.events[event]) return;
-    this.events[event].forEach((callback) => callback(data));
+  publishEvent(event: string, data: any) {
+    const customEvent=new CustomEvent(event,{detail:data});
+    this.eventBus.dispatchEvent(customEvent);
+  }
+  publishCommand(command:Command){
+     const customEvent=new CustomEvent(command.kind,{detail:command});
+     return this.eventBus.dispatchEvent(customEvent);
   }
 }
 

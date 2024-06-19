@@ -1,14 +1,14 @@
-import { publishEvent, subscribeToEvent } from "./bus";
-import config from "./Config";
-import { SOCKET_COMMAND } from "./constants";
-import { Command} from './Domain/Commands/Command';
-import { PublishCommand} from './Domain/Commands/PublishCommand';
-import { SubscribeCommand} from './Domain/Commands/SubscribeCommand';
-import { UnsubscribeCommand} from './Domain/Commands/UnsubscribeCommand';
-import { RefreshChannelsCommand} from './Domain/Commands/RefreshChannelsCommand';
-import { DisconnectCommand} from './Domain/Commands/DisconnectCommand';
-import { GetNewestMessagesCommand} from './Domain/Commands/GetNewestMessagesCommand';
-import { GetOlderMessagesCommand} from './Domain/Commands/GetOlderMessagesCommand';
+import { publishEvent, subscribeToEvent } from "../bus";
+import config from "../Config";
+import { SOCKET_COMMAND } from "../constants";
+import { Command} from '../Domain/Commands/Command';
+import { PublishCommand} from '../Domain/Commands/PublishCommand';
+import { SubscribeCommand} from '../Domain/Commands/SubscribeCommand';
+import { UnsubscribeCommand} from '../Domain/Commands/UnsubscribeCommand';
+import { RefreshChannelsCommand} from '../Domain/Commands/RefreshChannelsCommand';
+import { DisconnectCommand} from '../Domain/Commands/DisconnectCommand';
+import { GetNewestMessagesCommand} from '../Domain/Commands/GetNewestMessagesCommand';
+import { GetOlderMessagesCommand} from '../Domain/Commands/GetOlderMessagesCommand';
 import{
     SUBSCRIBE_COMMAND,
     UNSUBSCRIBE_COMMAND,
@@ -18,24 +18,38 @@ import{
     GET_OLDER_MESSAGES,
     SOCKET_RECEIVE,
     SOCKET_CLOSED,
-    } from "./events";
-import EventBus from "./Components/EventBus";
-export{connect,send};
+    } from "../events";
+import EventBus from "./EventBus";
+export{connect};
 
-
-subscribeToEvent("close_socket",onCloseSocketCommand);
-subscribeToEvent(SOCKET_COMMAND,onAsyncCommand);
-window.addEventListener("beforeunload",onUnload);
 var socket:WebSocket=null!;
 
-function onCloseSocketCommand(){
-    if(socket){
-        console.log("closing websocket");
-        socket.close();
-    }
-}
-function onUnload(){
-    publishEvent("close_socket",{});
+ function connect(){
+    if (socket && socket.readyState === WebSocket.OPEN) {
+        return;
+      }
+    
+      const url = get_url();
+      socket = new WebSocket(url);
+    
+      socket.onopen = () => {
+        console.log('WebSocket connection established');
+        command_get_subscriptions();
+      };
+    
+      socket.onmessage = (event) => {
+        const message = JSON.parse(event.data);
+        EventBus.publishEvent(SOCKET_RECEIVE, message);
+      };
+    
+      socket.onclose = (event) => {
+        console.log(`WebSocket closed: ${event.code} - ${event.reason}`);
+        EventBus.publishEvent(SOCKET_CLOSED, {});
+      };
+    
+      socket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
 }
 function get_url(){
     var user=JSON.parse(localStorage.user);
@@ -43,44 +57,20 @@ function get_url(){
     console.log("Url:"+url);
     return url;
 }
-function send(){
 
-}
- function connect(){
-    var url=get_url();
-    console.log("\nAttempting connect to:"+url+"\n");
-    
-    socket=new WebSocket(url);
-    socket.onopen=function (e){
-        console.log("\nConnection established\n");
-        command_get_subscriptions();
+//interface----------------------
+export function sendEvent(command: Command) {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify(command));
+    }else{
+        throw new Error("Socket is not connected");
     }
-    socket.onmessage=function(ev){
-      
-        if(ev.data=="ping"){
-            console.log("\nReceived ping");
-            socket.send("pong");
-        }
-        var message=JSON.parse(ev.data);
+  }
 
-        
-        console.log("\nReceived on socket: ");
-        console.log(message);
-        publishEvent(SOCKET_RECEIVE,message);
-
-    }
-    socket.onclose=function(e){
-        console.log(`Socket closed with code: ${e.code} , reason: ${e.reason}`);
-        publishEvent(SOCKET_CLOSED,{});
-       
-    }
-}
-
-function onDomContentLoaded(){
-
-}
-
-
+  // Subscribe to custom events to handle commands
+    EventBus.subscribe('SEND_COMMAND', (command: Command) => {
+    sendEvent(command);
+  });
 function onAsyncCommand(ev:CustomEvent){
     var data=ev.detail;
     onCommand(data);
@@ -222,25 +212,3 @@ function isGetOlderMessagesCommand(command: Command): command is GetOlderMessage
     return command.kind === "get_older_messages";
 }
 
-export function sendCommand(command: Command) {
-    if (socket && socket.readyState === WebSocket.OPEN) {
-      socket.send(JSON.stringify(command));
-    }
-  }
-  
-export function closeSocket() {
-    if (socket) {
-      console.log('Closing websocket');
-      socket.close();
-    }
-  }
-  
-  function getWebSocketUrl() {
-    const user = JSON.parse(localStorage.getItem('user')!);
-    return `${config.baseWsUrl}/ws/id/${user.id}`;
-  }
-  
-  // Subscribe to custom events to handle commands
-  EventBus.subscribe('SEND_COMMAND', (command: Command) => {
-    sendCommand(command);
-  });

@@ -3,11 +3,11 @@
 const REFRESH_CHANNELS_COMMAND:string="get_subscriptions";
 const SUBSCRIBE_COMMAND:string="subscribe";
 const UNSUBSCRIBE_COMMAND:string="unsubscribe";
-const PUBLISH_MESSAGE:string="publish";
-const SELF_PUBLISH_MESSAGE:string="self_publish";
-const GET_OLDER_MESSAGES:string="get_older_messages";
-const GET_NEWEST_MESSAGES:string="get_newest_messages";
-
+const PUBLISH_MESSAGE_COMMAND:string="publish";
+const SELF_PUBLISH_MESSAGE_COMMAND:string="self_publish";
+const GET_OLDER_MESSAGES_COMMAND:string="get_older_messages";
+const GET_NEWEST_MESSAGES_COMMAND:string="get_newest_messages";
+const DISCONNECT_COMMAND:string="disconnect";
 
 
 //socket command results
@@ -46,7 +46,7 @@ const HIDE_REGISTER:string="hideRegister";
 export {
     REFRESH_CHANNELS_COMMAND,
     REFRESH_CHANNELS_COMMAND_RESULT,
-
+    DISCONNECT_COMMAND,
     SET_CHANNELS,
     ADD_CHANNEL,
     REMOVE_CHANNEL,
@@ -69,10 +69,10 @@ export {
     RESET_CHAT_DOM,
     NEW_INCOMING_MESSAGE,
 
-    PUBLISH_MESSAGE,
-    SELF_PUBLISH_MESSAGE,
-    GET_OLDER_MESSAGES,
-    GET_NEWEST_MESSAGES,
+    PUBLISH_MESSAGE_COMMAND,
+    SELF_PUBLISH_MESSAGE_COMMAND,
+    GET_OLDER_MESSAGES_COMMAND,
+    GET_NEWEST_MESSAGES_COMMAND,
 
     SHOW_MAIN,
     HIDE_MAIN,

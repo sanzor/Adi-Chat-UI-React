@@ -1,7 +1,7 @@
 import React,{useState,FC}from 'react';
 import { User } from '../types/User';
-import { CreateUserParams } from '../dtos/CreateUserParams';
-import { CreateUserResult } from '../dtos/CreateUserResult';
+import { CreateUserParams } from '../Dtos/CreateUserParams';
+import { CreateUserResult } from '../Dtos/CreateUserResult';
 import config from '../Config';
 import { postDataAsync } from '../Utils';
 

@@ -2,7 +2,7 @@ import React, {  useState } from 'react';
 import { User } from '../types/User';
 import { getDataAsync } from '../Utils';
 import config from '../Config';
-import { LoginUserData } from '../dtos/LoginUserData';
+import { LoginUserData } from '../Dtos/LoginUserData';
 import '../css/general.css';
 import '../css/specific.css';
 export interface LoginComponentProps{

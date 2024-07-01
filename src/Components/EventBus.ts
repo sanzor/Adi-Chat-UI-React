@@ -1,9 +1,9 @@
-import { eventNames } from "process";
+
 import { Command } from "../Domain/Commands/Command";
 
 type EventCallback = (data: any) => void;
 
-class EventBus {
+export class EventBus {
   private eventBus: EventTarget;
   constructor(){
     this.eventBus=new EventTarget();

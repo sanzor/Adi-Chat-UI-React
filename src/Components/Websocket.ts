@@ -3,8 +3,9 @@ import config from "../Config";
 import{
     SOCKET_RECEIVE,
     SOCKET_CLOSED,
-    } from "../events";
+    } from "../Events";
 import EventBus from "./EventBus";
+import { receiveSocketResult, socketClosed } from "./WebsocketService";
 
 
 let socket: WebSocket | null = null;
@@ -29,13 +30,11 @@ let socket: WebSocket | null = null;
       };
     
       socket.onmessage = (event) => {
-        const message = JSON.parse(event.data);
-        EventBus.publishEvent(SOCKET_RECEIVE, message);
+        receiveSocketResult(event);
       };
     
       socket.onclose = (event) => {
-        console.log(`WebSocket closed: ${event.code} - ${event.reason}`);
-        EventBus.publishEvent(SOCKET_CLOSED, {});
+        socketClosed();
       };
     
       socket.onerror = (error) => {

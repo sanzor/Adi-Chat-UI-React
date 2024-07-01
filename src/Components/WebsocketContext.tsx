@@ -19,7 +19,7 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
 
   
   return (
-    <WebSocketContext.Provider value={{ send, subscribe, unsubscribe }}>
+    <WebSocketContext.Provider value={{connect,disconnect }}>
       {children}
     </WebSocketContext.Provider>
   );

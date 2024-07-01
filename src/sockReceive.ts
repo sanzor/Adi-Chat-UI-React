@@ -1,9 +1,9 @@
 
 import { ChatMessage } from "./Domain/ChatMessage";
-import { CommandResult } from "./Domain/Responses/CommandResult/CommandResult";
+import { CommandResult } from "./Dtos/SocketCommandResults/CommandResult";
 import { SubscribeResult } from "./Domain/Responses/CommandResult/SubscribeResult";
 import { UnsubscribeResult } from "./Domain/Responses/CommandResult/UnsubscribeResult";
-import { ReceivedMessage } from "./Domain/Responses/ReceivedMessage";
+import { ReceivedMessage } from "./Dtos/ReceivedMessage";
 import { publishEvent ,subscribeToEvent} from "./bus";
 import { 
         REFRESH_CHANNELS_COMMAND, 
@@ -15,8 +15,8 @@ import {
         UNSUBSCRIBE_COMMAND_RESULT, 
         UNSUBSCRIBE_COMMAND_RESULT_U,
         NEW_INCOMING_MESSAGE,
-        GET_NEWEST_MESSAGES,
-        GET_OLDER_MESSAGES} from "./events";
+        GET_NEWEST_MESSAGES_COMMAND,
+        GET_OLDER_MESSAGES_COMMAND} from "./Events";
 
 subscribeToEvent(SOCKET_RECEIVE,onSocketReceive);
 function onSocketReceive(ev:any){
@@ -62,10 +62,10 @@ function handle_command_result(data:CommandResult){
         console.log(data);
         publishEvent(REFRESH_CHANNELS_COMMAND_RESULT,data.result);
     }
-    if(data.command==GET_NEWEST_MESSAGES){
+    if(data.command==GET_NEWEST_MESSAGES_COMMAND){
         callback_get_newest_messages(data);
     }
-    if(data.command==GET_OLDER_MESSAGES){
+    if(data.command==GET_OLDER_MESSAGES_COMMAND){
         callback_get_older_messages(data);
     }
 }

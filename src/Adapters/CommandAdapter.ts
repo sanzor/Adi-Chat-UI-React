@@ -8,7 +8,7 @@ import { RefreshChannelsCommand } from "../Domain/Commands/RefreshChannelsComman
 import { SubscribeCommand } from "../Domain/Commands/SubscribeCommand";
 import { UnsubscribeCommand } from "../Domain/Commands/UnsubscribeCommand";
 import { DISCONNECT_COMMAND, GET_NEWEST_MESSAGES_COMMAND,GET_OLDER_MESSAGES_COMMAND,PUBLISH_MESSAGE_COMMAND,REFRESH_CHANNELS_COMMAND,SUBSCRIBE_COMMAND,UNSUBSCRIBE_COMMAND} 
- from "../events";
+ from "../Events";
 import { BaseCommandDto } from "../Dtos/SocketCommands/BaseCommandDto";
 import { SubscribeCommandDto } from "../Dtos/SocketCommands/SubscribeCommandDto";
 import { UnsubscribeCommandDto } from "../Dtos/SocketCommands/UnsubscribeCommandDto";

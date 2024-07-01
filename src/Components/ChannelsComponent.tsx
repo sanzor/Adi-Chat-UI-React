@@ -6,7 +6,7 @@ import { SUBSCRIBE_COMMAND_RESULT_U,
          NEW_INCOMING_MESSAGE,
          UNSUBSCRIBE_BUTTON_CLICK,
          CHANNEL_CLICK
-} from "../events";
+} from "../Events";
 export interface ChannelsComponentProps{
 
 }

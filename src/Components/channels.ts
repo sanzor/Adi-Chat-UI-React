@@ -1,10 +1,10 @@
 import { publishCommand, publishEvent, subscribeToEvent ,unsubscribeFromEvent} from "../bus";
 import { ChatMessage } from "../Domain/ChatMessage";
 import { Channel } from "../Domain/Channel";
-import{channelsContainer} from "../elements";
+import{channelsContainer} from "../Elements";
 import { setItemInStorage,getItemFromStorage } from "../Utils";
-import {subscribeBtn,subscribeBox} from "../elements";
-import { KIND, SOCKET_COMMAND, CURRENT_CHANNEL} from "../constants";
+import {subscribeBtn,subscribeBox} from "../Elements";
+import { KIND, SOCKET_COMMAND, CURRENT_CHANNEL} from "../Constants";
 import {
     REFRESH_CHANNELS_COMMAND_RESULT, 
     SUBSCRIBE_COMMAND_RESULT,
@@ -21,7 +21,7 @@ import {
     SET_CHANNELS,
     ADD_CHANNEL,
     REMOVE_CHANNEL,
-    CHANNEL_CLICK} from "../events";
+    CHANNEL_CLICK} from "../Events";
 import { SubscribeCommand } from "../Domain/Commands/SubscribeCommand";
 import { SubscribeResult } from "../Domain/Responses/CommandResult/SubscribeResult";
 import { UnsubscribeResult } from "../Domain/Responses/CommandResult/UnsubscribeResult";

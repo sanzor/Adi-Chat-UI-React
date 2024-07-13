@@ -1,10 +1,12 @@
 
 import { ChatMessage } from "./Domain/ChatMessage";
 import { CommandResult } from "./Dtos/SocketCommandResults/CommandResult";
-import { SubscribeResult } from "./Domain/Responses/CommandResult/SubscribeResult";
-import { UnsubscribeResult } from "./Domain/Responses/CommandResult/UnsubscribeResult";
+import { SubscribeCommandResultDto } from "./Dtos/SocketCommandResults/SubscribeCommandResultDto";
+import { UnsubscribeCommandResultDto } from "./Dtos/SocketCommandResults/UnsubscrirbeCommandResultDto";
+import { GetNewestMessagesCommandResultDto } from "./Dtos/SocketCommandResults/GetNewestMessagesCommandResultDto";
+import { GetOlderMessagesCommandResultDto } from "./Dtos/SocketCommandResults/GetOlderMessagesCommandResultDto";
 import { ReceivedMessage } from "./Dtos/ReceivedMessage";
-import { publishEvent ,subscribeToEvent} from "./bus";
+import { EventBus} from "./EventBus";
 import { 
         REFRESH_CHANNELS_COMMAND, 
         REFRESH_CHANNELS_COMMAND_RESULT,
@@ -17,6 +19,7 @@ import {
         NEW_INCOMING_MESSAGE,
         GET_NEWEST_MESSAGES_COMMAND,
         GET_OLDER_MESSAGES_COMMAND} from "./Events";
+
 
 subscribeToEvent(SOCKET_RECEIVE,onSocketReceive);
 function onSocketReceive(ev:any){
@@ -55,7 +58,7 @@ function handle_command_result(data:CommandResult){
         callback_subscribe(data);
     }
     if(data.command==UNSUBSCRIBE_COMMAND){
-        callback_unsubscribe(data as UnsubscribeResult);
+        callback_unsubscribe(data.result as UnsubscribeCommandResultDto);
     }
     if(data.command==REFRESH_CHANNELS_COMMAND){
         
@@ -87,23 +90,23 @@ function handle_user_event_unsubscribe(data:any){
     console.log("Publishing update channels");
     publishEvent(UNSUBSCRIBE_COMMAND_RESULT_U,data);
 }
-function callback_subscribe(data:SubscribeResult){
+function callback_subscribe(data:SubscribeCommandResultDto){
     console.log(data);
     publishEvent(SUBSCRIBE_COMMAND_RESULT,data);
    
 }
-function callback_unsubscribe(data:UnsubscribeResult){
+function callback_unsubscribe(data:UnsubscribeCommandResultDto){
     console.log(data);
-    if(data.result=="ok"){
+    if(data.unsubscribeResult=="ok"){
         publishEvent(UNSUBSCRIBE_COMMAND_RESULT,data);
         publishEvent(RESET_CHAT,{});
     }
 }
-function callback_get_newest_messages(data:any){
-    publishEvent("getNewestMessages",data.result)
+function callback_get_newest_messages(data:GetNewestMessagesCommandResultDto){
+    publishEvent("getNewestMessages",data.messages)
     console.log(data.messages);
 }
-function callback_get_older_messages(data:any){
+function callback_get_older_messages(data:GetOlderMessagesCommandResultDto){
     publishEvent("getOlderMessages",data.result);
 }
 

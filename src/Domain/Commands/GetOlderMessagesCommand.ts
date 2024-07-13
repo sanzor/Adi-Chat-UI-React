@@ -1,7 +1,8 @@
+import { GET_OLDER_MESSAGES_COMMAND } from "../../Events";
 import { Command } from "./Command";
 
 export interface GetOlderMessagesCommand extends Command {
-    kind: "get_older_messages";
+    kind: typeof GET_OLDER_MESSAGES_COMMAND;
     topicId: number;
     startIndex: number;
     count: number;

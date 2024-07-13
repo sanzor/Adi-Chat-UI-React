@@ -1,5 +1,5 @@
 import React,{useState,FC}from 'react';
-import { User } from '../types/User';
+import { User } from '../Domain/User';
 import { CreateUserParams } from '../Dtos/CreateUserParams';
 import { CreateUserResult } from '../Dtos/CreateUserResult';
 import config from '../Config';

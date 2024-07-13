@@ -5,7 +5,7 @@ import { Command } from '../Domain/Commands/Command';
 
 
 interface WebSocketContextType {
-  connect(): () => void;
+  connect: () => void;
   disconnect : ()=> void;
 }
 
@@ -16,7 +16,7 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
   const disconnectWebsocket=useCallback((event:Event,callback:(data:any)=>void)=>{
       disconnect();
   },[]);
-
+  
   
   return (
     <WebSocketContext.Provider value={{connect,disconnect }}>

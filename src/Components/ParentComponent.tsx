@@ -1,6 +1,6 @@
 import React,{useState,FC, useEffect} from "react";
 import LoginComponent from "./LoginComponent";
-import { User } from "../types/User";
+import { User } from "../Domain/User";
 import RegisterComponent from "./RegisterComponent";
 import { getItemFromStorage, setItemInStorage } from "../Utils";
 import MainComponent from "./MainComponent";

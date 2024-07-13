@@ -4,11 +4,16 @@ import { DisconnectCommand } from "../Domain/Commands/DisconnectCommand";
 import { GetNewestMessagesCommand } from "../Domain/Commands/GetNewestMessagesCommand";
 import { GetOlderMessagesCommand } from "../Domain/Commands/GetOlderMessagesCommand";
 import { PublishCommand } from "../Domain/Commands/PublishCommand";
-import { RefreshChannelsCommand } from "../Domain/Commands/RefreshChannelsCommand";
+import { GetSubscripttionsCommand } from "../Domain/Commands/RefreshChannelsCommand";
 import { SubscribeCommand } from "../Domain/Commands/SubscribeCommand";
 import { UnsubscribeCommand } from "../Domain/Commands/UnsubscribeCommand";
-import { DISCONNECT_COMMAND, GET_NEWEST_MESSAGES_COMMAND,GET_OLDER_MESSAGES_COMMAND,PUBLISH_MESSAGE_COMMAND,REFRESH_CHANNELS_COMMAND,SUBSCRIBE_COMMAND,UNSUBSCRIBE_COMMAND} 
- from "../Events";
+import { DISCONNECT_COMMAND,
+        GET_NEWEST_MESSAGES_COMMAND,
+        GET_OLDER_MESSAGES_COMMAND,
+        PUBLISH_MESSAGE_COMMAND,
+        REFRESH_CHANNELS_COMMAND,
+        SUBSCRIBE_COMMAND,
+        UNSUBSCRIBE_COMMAND} from "../Events";
 import { BaseCommandDto } from "../Dtos/SocketCommands/BaseCommandDto";
 import { SubscribeCommandDto } from "../Dtos/SocketCommands/SubscribeCommandDto";
 import { UnsubscribeCommandDto } from "../Dtos/SocketCommands/UnsubscribeCommandDto";
@@ -131,7 +136,7 @@ function isUnsubscribeCommand(command: Command): command is UnsubscribeCommand {
     return command.kind === UNSUBSCRIBE_COMMAND;
 }
 
-function isRefreshChannelsCommand(command: Command): command is RefreshChannelsCommand {
+function isRefreshChannelsCommand(command: Command): command is GetSubscripttionsCommand {
     return command.kind === REFRESH_CHANNELS_COMMAND;
 }
 

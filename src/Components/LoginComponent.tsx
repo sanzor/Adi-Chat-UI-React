@@ -1,5 +1,5 @@
 import React, {  useState } from 'react';
-import { User } from '../types/User';
+import { User } from '../Domain/User';
 import { getDataAsync } from '../Utils';
 import config from '../Config';
 import { LoginUserData } from '../Dtos/LoginUserData';

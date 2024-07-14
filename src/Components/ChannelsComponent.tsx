@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { subscribeToEvent } from "../bus";
 import { SUBSCRIBE_COMMAND_RESULT_U,
          UNSUBSCRIBE_COMMAND_RESULT_U,
          REFRESH_CHANNELS_COMMAND_RESULT,
@@ -7,13 +6,14 @@ import { SUBSCRIBE_COMMAND_RESULT_U,
          UNSUBSCRIBE_BUTTON_CLICK,
          CHANNEL_CLICK
 } from "../Events";
+import EventBus from "./EventBus";
 export interface ChannelsComponentProps{
 
 }
 const ChannelsComponent:React.FC<ChannelsComponentProps>=(props)=>{
 
     useEffect(()=>{
-        subscribeToEvent(SUBSCRIBE_COMMAND_RESULT_U,onSubscribeResultU);
+        EventBus.subscribe(SUBSCRIBE_COMMAND_RESULT_U,()=>{});//onSubscribeResultU);
     },[]);
     
     return(

@@ -1,4 +1,4 @@
-import { User } from "../types/User";
+import { User } from "../Domain/User";
 
 export interface CreateUserResult{
     result:User|string;

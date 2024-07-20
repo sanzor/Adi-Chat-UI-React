@@ -6,7 +6,6 @@ import { UnsubscribeCommandResultDto } from "./Dtos/SocketCommandResults/Unsubsc
 import { GetNewestMessagesCommandResultDto } from "./Dtos/SocketCommandResults/GetNewestMessagesCommandResultDto";
 import { GetOlderMessagesCommandResultDto } from "./Dtos/SocketCommandResults/GetOlderMessagesCommandResultDto";
 import { ReceivedMessage } from "./Dtos/ReceivedMessage";
-import Eve from "./EventBus";
 import { 
         REFRESH_CHANNELS_COMMAND, 
         REFRESH_CHANNELS_COMMAND_RESULT,
@@ -18,8 +17,9 @@ import {
         UNSUBSCRIBE_COMMAND_RESULT_U,
         NEW_INCOMING_MESSAGE,
         GET_NEWEST_MESSAGES_COMMAND,
-        GET_OLDER_MESSAGES_COMMAND} from "./Events";
+        GET_OLDER_MESSAGES_COMMAND,} from "./Events";
 import EventBus from "./EventBus";
+import {CHAT,USER_EVENT,COMMAND_RESULT} from "./Constants";
 
 
 EventBus.subscribe(SOCKET_RECEIVE,onSocketReceive);
@@ -27,15 +27,15 @@ EventBus.subscribe(SOCKET_RECEIVE,onSocketReceive);
 function onSocketReceive(ev:any){
    
     var data=ev.detail as ReceivedMessage;
-    if(data.kind=="chat"){
+    if(data.kind==CHAT){
         handle_chat_message(data as ChatMessage);
         return;
     }
-    if(data.kind=="command_result"){
+    if(data.kind==COMMAND_RESULT){
         handle_command_result(data as CommandResult);
         return;
     }
-    if(data.kind="user_event"){
+    if(data.kind=USER_EVENT){
         
         console.log("Received user event");
         console.log(data as any);
@@ -99,14 +99,15 @@ function callback_subscribe(data:SubscribeCommandResultDto){
 }
 function callback_unsubscribe(data:UnsubscribeCommandResultDto){
     console.log(data);
-    if(data.unsubscribeResult=="ok"){
+    if(data.result=="ok"){
         EventBus.publish(UNSUBSCRIBE_COMMAND_RESULT,data);
         EventBus.publish(RESET_CHAT,{});
     }
 }
 function callback_get_newest_messages(data:GetNewestMessagesCommandResultDto){
-    EventBus.publish("getNewestMessages",data.messages)
     console.log(data.messages);
+    EventBus.publish("getNewestMessages",data.messages)
+   
 }
 function callback_get_older_messages(data:GetOlderMessagesCommandResultDto){
     EventBus.publish("getOlderMessages",data.result);

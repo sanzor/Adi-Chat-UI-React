@@ -43,7 +43,7 @@ const RegisterComponent:FC<RegisterComponentProps>=(props)=>{
         }
     };
     async function createUserAsync(userData:CreateUserParams):Promise<CreateUserResult>{
-        var url:string=`${config.baseHttpUrl}/create-user`;
+        var url:string=`/create-user`;
         var result=await postDataAsync(url,userData);
         console.log("in create\n");
         console.log(result);

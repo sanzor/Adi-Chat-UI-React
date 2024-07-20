@@ -7,8 +7,13 @@ const KIND:string="kind";
 const SOCKET_COMMAND:string="socket_command";
 const ID:string="id";
 const USER:string="user";
-
-
+const CHAT="chat";
+const USER_EVENT="user_event";
+const COMMAND_RESULT="command_result";
+const MESSAGE_TYPES=[
+    USER_EVENT,COMMAND_RESULT,CHAT
+];
+export{CHAT,USER_EVENT,COMMAND_RESULT,MESSAGE_TYPES};
 
 export {
     CHANNEL,TOPIC,KIND,SOCKET_COMMAND,CURRENT_CHANNEL,ID,USER

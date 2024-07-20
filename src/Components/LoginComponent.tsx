@@ -17,7 +17,7 @@ const LoginComponent:React.FC<LoginComponentProps>=(props)=>{
     const [loginFailMessage,setLoginFailMessage]=useState('');
 
     async function getUserByEmailAsync(loginUserData:LoginUserData):Promise<User|null>{
-        var url=`${config.baseHttpUrl}/get-user-by-email?email=${loginUserData.email}&password=${loginUserData.password}`;
+        var url=`/get-user-by-email?email=${loginUserData.email}&password=${loginUserData.password}`;
         var result=await getDataAsync(url);
         console.log(result);
         return result;

@@ -1,5 +1,4 @@
-const config={
-    baseHttpUrl:"http://localhost:8080",
-    baseWsUrl:"ws://localhost:8080"
+const config = {
+    baseHttpUrl: process.env.REACT_APP_API_URL,
+    baseWsUrl: process.env.REACT_APP_WS_URL
 };
-export default config;

@@ -7,60 +7,55 @@ import MainComponent from "./MainComponent";
 export interface ParentComponentProps{
 
 };
+enum VIEWSTATE{
+    LOGIN='login',
+    REGISTER='register',
+    MAIN='main'
+}
 const ParentComponent:FC<ParentComponentProps>=(props)=>{
     const [user,setUser]=useState<User|null>(null);
-    const [showLogin,setShowLogin]=useState(true);
-    const [showRegister,setShowRegister]=useState(false);
-    const [showMain,setShowMain]=useState(false);
+    const [viewstate,setViewState]=useState<VIEWSTATE>(VIEWSTATE.LOGIN)
 
     useEffect(()=>{
         const storedUser=getItemFromStorage<User>('user');
         if(storedUser){
             setUser(storedUser);
+            setViewState(VIEWSTATE.MAIN)
+        }else{
+            setViewState(VIEWSTATE.LOGIN)
         }
     },[]);
-    const handleShowLogin=()=>{
-        setShowLogin(true);
-        setShowRegister(false);
-        setShowMain(false);
-    };
-    const handleShowRegister=()=>{
-        setShowRegister(true);
-        setShowLogin(false);
-        setShowMain(false);
-    };
-    const handleShowMain=()=>{
-        setShowLogin(false);
-        setShowMain(true);
-    }
+   
     const handleLoginSuccessful=(user:User):void=>{
         setUser(user);
         setItemInStorage<User>('user',user);
-        handleShowMain();
+        setViewState(VIEWSTATE.MAIN)
     };
     const handleRegisterSuccessful=(user:User):void=>{
         setUser(user);
-        handleShowMain();
+        setViewState(VIEWSTATE.MAIN)
 
     }
     const handleBackToLogin=()=>{
-        handleShowLogin();
+        setViewState(VIEWSTATE.LOGIN)
     }
     const handleLogout=()=>{
-        handleShowLogin();
+        setViewState(VIEWSTATE.LOGIN)
     };
-    return(<>{showLogin && 
+    return(<>
+   
+            {viewstate===VIEWSTATE.LOGIN && 
             <LoginComponent 
-                    onRegister={handleShowRegister} 
+                    onRegister={()=>setViewState(VIEWSTATE.REGISTER)} 
                     onLoginSuccess={handleLoginSuccessful}
-                    userdata={user}/>
-           }
-             {showRegister && 
+                    userdata={user}/>}
+            
+            {viewstate===VIEWSTATE.REGISTER && 
              <RegisterComponent
                      onRegisterSuccess={handleRegisterSuccessful}
                      onBackToLogin={handleBackToLogin}/>
              }
-             {showMain &&
+             {viewstate===VIEWSTATE.MAIN &&
              <MainComponent onLogout={handleLogout}/>}
              </>);
 };

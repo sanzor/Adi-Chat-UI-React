@@ -3,7 +3,6 @@ import { User } from '../Domain/User';
 import { getDataAsync } from '../Utils';
 import config from '../Config';
 import { LoginUserData } from '../Dtos/LoginUserData';
-import '../css/general.css';
 import '../css/specific.css';
 export interface LoginComponentProps{
     onLoginSuccess:(User:User)=>void;
@@ -43,7 +42,8 @@ const LoginComponent:React.FC<LoginComponentProps>=(props)=>{
     };
 
     return(
-    <div id="loginModal">
+    
+    <div id="loginModal"> 
     <div id="loginPanel">
         <div style={{ alignSelf: 'center' }}>Login</div>
         <div className="formRow">
@@ -62,7 +62,8 @@ const LoginComponent:React.FC<LoginComponentProps>=(props)=>{
             <p id="loginFailMessage">{loginFailMessage}</p>
         </div>
     </div>
-</div>);
+    </div>
+    );
 }
 
 export default LoginComponent;

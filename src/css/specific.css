@@ -1,7 +1,6 @@
 
 #mainModal{
     height: 100%;
-    display:none;
 }
 #parentPanel {
     display: flex;
@@ -12,7 +11,6 @@
     padding-right: 1%;
 }
 #loginModal{
-    display: none;
     position: fixed;
     background-color: rgba(0,0,0,0.2);
     top:15%;
@@ -25,7 +23,6 @@
     position: unset;
 }
 #registerModal{
-    display:none;
     position:fixed;
     background-color: rgba(139, 139, 129, 0.842);
     top:15%;

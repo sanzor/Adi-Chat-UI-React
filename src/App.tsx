@@ -6,13 +6,11 @@ import { WebSocketProvider } from './Components/WebsocketContext';
 
 const  App:React.FC=()=> {
   return (
-    <WebSocketProvider>
        <div className="App">
-      <ParentComponent />
+        <ParentComponent />
+      
     </div>
-    </WebSocketProvider>
    
-
   );
 }
 

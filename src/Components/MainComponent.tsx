@@ -2,7 +2,8 @@ import { useState } from "react";
 import ChannelsComponent from "./ChannelsComponent";
 import ChatComponent from "./ChatComponent";
 import ChatSendComponent from "./ChatSendComponent";
-
+import '../css/specific.css';
+import '../css/general.css';
 export interface MainComponentProps{
     onLogout:()=>void;
 }

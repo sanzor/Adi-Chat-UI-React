@@ -4,6 +4,10 @@ import { User } from "../Domain/User";
 import RegisterComponent from "./RegisterComponent";
 import { getItemFromStorage, setItemInStorage } from "../Utils";
 import MainComponent from "./MainComponent";
+import '../css/specific.css';
+import '../css/general.css';
+import '../css/chat.css';
+import '../css/channels.css'
 export interface ParentComponentProps{
 
 };

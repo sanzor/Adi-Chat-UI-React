@@ -3,7 +3,7 @@ import { User } from '../Domain/User';
 import { getDataAsync } from '../Utils';
 import config from '../Config';
 import { LoginUserData } from '../Dtos/LoginUserData';
-import '../css/specific.css';
+
 export interface LoginComponentProps{
     onLoginSuccess:(User:User)=>void;
     onRegister:()=>void;
@@ -17,6 +17,7 @@ const LoginComponent:React.FC<LoginComponentProps>=(props)=>{
 
     async function getUserByEmailAsync(loginUserData:LoginUserData):Promise<User|null>{
         var url=`/get-user-by-email?email=${loginUserData.email}&password=${loginUserData.password}`;
+        
         var result=await getDataAsync(url);
         console.log(result);
         return result;

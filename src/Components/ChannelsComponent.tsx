@@ -6,9 +6,6 @@ import { SUBSCRIBE_COMMAND_RESULT_U,
          UNSUBSCRIBE_BUTTON_CLICK,
          CHANNEL_CLICK
 } from "../Events";
-import '../css/specific.css';
-import '../css/general.css';
-import '../css/channels.css';
 import EventBus from "./EventBus";
 export interface ChannelsComponentProps{
 

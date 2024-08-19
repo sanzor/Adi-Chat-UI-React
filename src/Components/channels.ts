@@ -160,8 +160,7 @@ async function onUnsubscribeAsync(event:CustomEvent):Promise<void>{
         });
         EventBus.publish(SOCKET_COMMAND,{[KIND]:UNSUBSCRIBE_COMMAND,"topicId":channel.id});
     });
-    var _=await handleUnsubscribeResultAsync(unsubscribeResult);
-     
+    var _=await handleUnsubscribeResultAsync(unsubscribeResult); 
 }
 async function handleUnsubscribeResultAsync(unsubscribeResult:UnsubscribeCommandResultDto):Promise<any>{
     console.log(unsubscribeResult);

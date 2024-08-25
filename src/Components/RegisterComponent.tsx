@@ -15,7 +15,9 @@ const RegisterComponent:FC<RegisterComponentProps>=(props)=>{
     const [email,setEmail]=useState('adriansan_93@yahoo.com');
     const [retypePassword,setRetypePasswoord]=useState('aa');
     const [registerFailMessage,setRegisterFailMessage]=useState('');
-
+    const onBackToLogin= function(){
+        props.onBackToLogin();
+    }
     async function onSubmit():Promise<void>{
         console.log("onSubmit");
         var validateResult=validateCreateUserData({name:username,password:password,email:email,retypePassword:retypePassword});
@@ -61,8 +63,8 @@ const RegisterComponent:FC<RegisterComponentProps>=(props)=>{
             return new Error("Passwords do not match");
         }
         return data;
-    
     }
+    
     return( 
     <div id="registerModal">
     <div id="registerPanel">
@@ -83,7 +85,7 @@ const RegisterComponent:FC<RegisterComponentProps>=(props)=>{
             <label id="retypePasswordLabel" className="subscribeLabel">Retype Password</label>
         </div>
         <div className="formRow">
-            <button id="backToLoginBtn">Back to Login</button>
+            <button id="backToLoginBtn" onClick={onBackToLogin}>Back to Login</button>
             <button id="submitBtn" onClick={onSubmit}>Submit</button>
         </div>
         <div className="formRow">

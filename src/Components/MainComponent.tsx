@@ -14,10 +14,14 @@ import { Channel } from "../Domain/Channel";
 export interface MainComponentProps{
     onLogout:()=>void;
 }
-const MainComponent:React.FC<MainComponentProps> =()=>{
+const MainComponent:React.FC<MainComponentProps> =(props)=>{
     const [subscribe,setSubscribe]=useState('');
+    const [firstChatSet,setFirstChat]=useState(false);
     const handleLogout=()=>{
-
+        console.log("closing socket...");
+        EventBus.publishEvent("close_socket",{});
+        localStorage.removeItem("user");
+        props.onLogout();
     };
 
     const handleSubscribe=async()=>{
@@ -69,8 +73,8 @@ const MainComponent:React.FC<MainComponentProps> =()=>{
         
         setItemInStorage(CHANNELS,newChannelList);
         EventBus.publishEvent(ADD_CHANNEL,targetChannel);
-        if(state.first_chat_set==false){
-            state.first_chat_set=true;
+        if(!firstChatSet){
+            setFirstChat(true);
             EventBus.publishEvent(SET_CHAT,targetChannel);
         }
     }
@@ -86,7 +90,7 @@ const MainComponent:React.FC<MainComponentProps> =()=>{
             </button>
         </div>
         <div id="subscribeButtonPanel" className="panel">
-            <input  id="subscribeBox" defaultValue={""} type="text" value={subscribe} onChange={(e)=>setSubscribe(e.target.value)}/>
+            <input  id="subscribeBox" type="text" value={subscribe} onChange={(e)=>setSubscribe(e.target.value)}/>
             <label id="subscribeLabel" className="subscribeLabel" >Channel</label>
             <button id="subscribeBtn" className="subscribeButton" type="button" onClick={handleSubscribe}>Subscribe</button>
         </div> 

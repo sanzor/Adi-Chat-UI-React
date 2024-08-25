@@ -13,7 +13,7 @@ import { SUBSCRIBE_COMMAND_RESULT_U,
 } from "../Events";
 import EventBus from "./EventBus";
 import { UnsubscribeCommandResultDto } from "../Dtos/SocketCommandResults/UnsubscrirbeCommandResultDto";
-import { CHANNELS, CURRENT_CHANNEL, KIND, SOCKET_COMMAND } from "../Constants";
+import { CHANNELS, CURRENT_CHANNEL, KIND, SOCKET_COMMAND, TOPIC_ID } from "../Constants";
 import { UnsubscribeCommand } from "../Domain/Commands/UnsubscribeCommand";
 import { getItemFromStorage, setItemInStorage } from "../Utils";
 import { Channel } from "../Domain/Channel";
@@ -25,7 +25,7 @@ const ChannelsComponent:React.FC<ChannelsComponentProps>=(props)=>{
     useEffect(()=>{
         EventBus.subscribe(SUBSCRIBE_COMMAND_RESULT_U,()=>{});//onSubscribeResultU);
     },[]);
-    const handleUnsubscribe= async function onUnsubscribeAsync(event:CustomEvent):Promise<void>{
+    const handleUnsubscribe= async function(event:CustomEvent):Promise<void>{
         var channel=event.detail;
         var unsubscribeResult=await new Promise<UnsubscribeCommandResultDto>((resolve,_)=>{
             EventBus.subscribe(UNSUBSCRIBE_COMMAND_RESULT,(ev:CustomEvent)=>{
@@ -36,9 +36,9 @@ const ChannelsComponent:React.FC<ChannelsComponentProps>=(props)=>{
             });
             EventBus.publishCommand({[KIND]:UNSUBSCRIBE_COMMAND,topicId:channel.id} as UnsubscribeCommand);
         });
-            var _=await handleUnsubscribeResultAsync(unsubscribeResult); 
+            var _=await handleUnsubscribeResult(unsubscribeResult); 
         };
-    async function handleUnsubscribeResultAsync(unsubscribeResult:UnsubscribeCommandResultDto):Promise<any>{
+    const handleUnsubscribeResult=async function(unsubscribeResult:UnsubscribeCommandResultDto):Promise<any>{
             console.log(unsubscribeResult);
             if(unsubscribeResult.result=="not_joined"){
                 console.log("Not joined");
@@ -74,9 +74,7 @@ const ChannelsComponent:React.FC<ChannelsComponentProps>=(props)=>{
                 EventBus.publishEvent(SET_CHAT,newExistingChannels[0]);
                 
             }
-        }
-        
-    };
+        };
     return(
     <>
        <div id="channelsPanel" className="channelsPanel">

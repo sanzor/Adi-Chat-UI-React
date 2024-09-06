@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { SUBSCRIBE_COMMAND_RESULT_U,
          UNSUBSCRIBE_COMMAND_RESULT_U,
          REFRESH_CHANNELS_COMMAND_RESULT,
@@ -18,10 +18,11 @@ import { UnsubscribeCommand } from "../Domain/Commands/UnsubscribeCommand";
 import { getItemFromStorage, setItemInStorage } from "../Utils";
 import { Channel } from "../Domain/Channel";
 export interface ChannelsComponentProps{
-
+    channels:Channel[],
+    setChannels:React.Dispatch<React.SetStateAction<Channel[]>>;
 }
-const ChannelsComponent:React.FC<ChannelsComponentProps>=(props)=>{
-
+const ChannelsComponent:React.FC<ChannelsComponentProps>=(channels,setChannels)=>{
+   
     useEffect(()=>{
         EventBus.subscribe(SUBSCRIBE_COMMAND_RESULT_U,()=>{});//onSubscribeResultU);
     },[]);

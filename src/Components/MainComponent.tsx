@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ChannelsComponent from "./ChannelsComponent";
 import ChatComponent from "./ChatComponent";
 import ChatSendComponent from "./ChatSendComponent";
@@ -11,12 +11,32 @@ import { CHANNELS, CURRENT_CHANNEL, KIND } from "../Constants";
 import { SubscribeCommand } from "../Domain/Commands/SubscribeCommand";
 import { getItemFromStorage, setItemInStorage } from "../Utils";
 import { Channel } from "../Domain/Channel";
+import { channel } from "diagnostics_channel";
 export interface MainComponentProps{
     onLogout:()=>void;
 }
 const MainComponent:React.FC<MainComponentProps> =(props)=>{
+    const [channels,setChannels]=useState<Channel[]>(()=>{
+        const storedChannels=getItemFromStorage<Channel[]>(CHANNELS);
+        return storedChannels ?storedChannels: [];
+    });
+
+    const [currentChannel,setCurrentChannel]=useState<Channel>(()=>{
+        const storedChannel=getItemFromStorage<Channel>(CURRENT_CHANNEL);
+        return storedChannel?storedChannel:null;
+    });
     const [subscribe,setSubscribe]=useState('');
     const [firstChatSet,setFirstChat]=useState(false);
+
+    useEffect(()=>{
+        setItemInStorage(CHANNELS,channels);
+    },[channels]);
+
+    useEffect(()=>{
+        setItemInStorage(CURRENT_CHANNEL,currentChannel);
+    },[currentChannel]);
+
+
     const handleLogout=()=>{
         console.log("closing socket...");
         EventBus.publishEvent("close_socket",{});
@@ -52,27 +72,20 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
             return;
         }
         var targetChannel:Channel={id:subscribeResult.topic!.id,name:subscribeResult.topic!.name}!;
-        var existingChannels=getItemFromStorage<Array<Channel>>(CHANNELS);
-        if(!existingChannels){
-            setItemInStorage(CURRENT_CHANNEL,targetChannel);
-            EventBus.publishEvent(SET_CHAT,targetChannel);
-            setItemInStorage(CHANNELS,[targetChannel]);
-            EventBus.publishEvent(ADD_CHANNEL,targetChannel);
-            return;
-        }
-        var newChannelList=[...existingChannels,targetChannel];
-        var currentChannel=getItemFromStorage<Channel>(CURRENT_CHANNEL);
-        console.log(currentChannel);
-        if(currentChannel==null ||  !existingChannels.find(x=>x.id!=currentChannel?.id)){
-            setItemInStorage(CURRENT_CHANNEL,targetChannel);
-            setItemInStorage(CHANNELS,newChannelList);
-            EventBus.publishEvent(SET_CHAT,targetChannel);
-            EventBus.publishEvent(ADD_CHANNEL,targetChannel);
-            return;
-        }
         
-        setItemInStorage(CHANNELS,newChannelList);
-        EventBus.publishEvent(ADD_CHANNEL,targetChannel);
+        if(!channels.find((channel)=>channel.id===targetChannel.id)){
+            const newChannelList=[...channels,targetChannel];
+            setChannels(newChannelList);
+            EventBus.publishEvent(ADD_CHANNEL,targetChannel);
+
+
+            if(!currentChannel|| !channels.find((channel)=>channel.id===currentChannel.id)){
+                setCurrentChannel(targetChannel);
+                EventBus.publishEvent(SET_CHAT,targetChannel);
+                return;
+            }
+        }
+    
         if(!firstChatSet){
             setFirstChat(true);
             EventBus.publishEvent(SET_CHAT,targetChannel);
@@ -94,7 +107,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
             <label id="subscribeLabel" className="subscribeLabel" >Channel</label>
             <button id="subscribeBtn" className="subscribeButton" type="button" onClick={handleSubscribe}>Subscribe</button>
         </div> 
-        <ChannelsComponent></ChannelsComponent>
+        <ChannelsComponent channels={channels}  setChannels={setChannels} ></ChannelsComponent>
         <ChatComponent></ChatComponent>
         <ChatSendComponent></ChatSendComponent>
     </div></div>

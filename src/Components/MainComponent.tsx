@@ -5,13 +5,14 @@ import ChatSendComponent from "./ChatSendComponent";
 import '../css/specific.css';
 import '../css/general.css';
 import { SubscribeCommandResultDto } from "../Dtos/SocketCommandResults/SubscribeCommandResultDto";
-import { ADD_CHANNEL, SET_CHAT, SUBSCRIBE_COMMAND_RESULT } from "../Events";
+import { ADD_CHANNEL, REFRESH_CHANNELS_COMMAND_RESULT, REMOVE_CHANNEL, RESET_CHAT, SET_CHAT, SUBSCRIBE_COMMAND_RESULT, UNSUBSCRIBE_COMMAND, UNSUBSCRIBE_COMMAND_RESULT } from "../Events";
 import EventBus from "./EventBus";
-import { CHANNELS, CURRENT_CHANNEL, KIND } from "../Constants";
+import { CHANNELS, CURRENT_CHANNEL, KIND, TOPIC_ID } from "../Constants";
 import { SubscribeCommand } from "../Domain/Commands/SubscribeCommand";
 import { getItemFromStorage, setItemInStorage } from "../Utils";
 import { Channel } from "../Domain/Channel";
-import { channel } from "diagnostics_channel";
+import { UnsubscribeCommandResultDto } from "../Dtos/SocketCommandResults/UnsubscrirbeCommandResultDto";
+import { UnsubscribeCommand } from "../Domain/Commands/UnsubscribeCommand";
 export interface MainComponentProps{
     onLogout:()=>void;
 }
@@ -21,10 +22,10 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
         return storedChannels ?storedChannels: [];
     });
 
-    const [currentChannel,setCurrentChannel]=useState<Channel>(()=>{
-        const storedChannel=getItemFromStorage<Channel>(CURRENT_CHANNEL);
-        return storedChannel?storedChannel:null;
-    });
+    const [currentChannel, setCurrentChannel] = useState<Channel | null>(() => {
+        const storedCurrentChannel = localStorage.getItem('currentChannel');
+        return storedCurrentChannel ? JSON.parse(storedCurrentChannel) : null;
+      });
     const [subscribe,setSubscribe]=useState('');
     const [firstChatSet,setFirstChat]=useState(false);
 
@@ -85,12 +86,55 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
                 return;
             }
         }
-    
         if(!firstChatSet){
             setFirstChat(true);
             EventBus.publishEvent(SET_CHAT,targetChannel);
         }
     }
+
+    const handleUnsubscribe= async function(event:CustomEvent):Promise<void>{
+        var channel=event.detail;
+        var unsubscribeResult=await new Promise<UnsubscribeCommandResultDto>((resolve,_)=>{
+            EventBus.subscribe(UNSUBSCRIBE_COMMAND_RESULT,(ev:CustomEvent)=>{
+                EventBus.unsubscribe(REFRESH_CHANNELS_COMMAND_RESULT,function(_:any){
+                    console.log("unsbuscribed from refresh_channels after unsubscribe from channel");
+                });
+                resolve(ev.detail as UnsubscribeCommandResultDto);
+            });
+            EventBus.publishCommand({[KIND]:UNSUBSCRIBE_COMMAND,topicId:channel.id} as UnsubscribeCommand);
+        });
+            var _=await handleUnsubscribeResult(unsubscribeResult); 
+        };
+
+    const handleUnsubscribeResult=async function(unsubscribeResult:UnsubscribeCommandResultDto):Promise<any>{
+            console.log(unsubscribeResult);
+            if(unsubscribeResult.result=="not_joined"){
+                console.log("Not joined");
+                return "not_joined";
+            }
+            if(unsubscribeResult.result!="ok"){
+                var message="Could not unsubscribe from channel";
+                return new Error(message);
+            }
+            setChannels((prevChannels: Channel[]) => {
+                const newChannels = prevChannels.filter((channel) => channel.id !== unsubscribeResult.topicId);
+                // Always return an array of channels, even if it's empty
+                if (newChannels.length === 0) {
+                  EventBus.publishEvent(RESET_CHAT, {});
+                  return newChannels; // Empty array is returned
+                }
+                // Update the current channel if needed
+                if (newChannels.every((channel) => channel.id !== unsubscribeResult.topicId)) {
+                  EventBus.publishEvent(SET_CHAT, newChannels[0]);
+                }
+            
+                EventBus.publishEvent(REMOVE_CHANNEL, { [TOPIC_ID]: unsubscribeResult.topicId });
+                console.log(unsubscribeResult);
+            
+                return newChannels; // Ensure that a valid Channel[] is returned
+              });
+        };  
+
     return (
     <>
     <div id="parentPanel" className="parent">
@@ -107,7 +151,14 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
             <label id="subscribeLabel" className="subscribeLabel" >Channel</label>
             <button id="subscribeBtn" className="subscribeButton" type="button" onClick={handleSubscribe}>Subscribe</button>
         </div> 
-        <ChannelsComponent channels={channels}  setChannels={setChannels} ></ChannelsComponent>
+        <ChannelsComponent 
+            channels={channels}  
+            setChannels={setChannels} 
+            setCurrentChannel={setCurrentChannel}
+            currentChannel={currentChannel}
+            handleUnsubscribe={()=>handleUnsubscribe}>
+
+        </ChannelsComponent>
         <ChatComponent></ChatComponent>
         <ChatSendComponent></ChatSendComponent>
     </div></div>

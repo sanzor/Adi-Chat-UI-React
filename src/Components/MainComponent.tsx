@@ -156,9 +156,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
             setChannels={setChannels} 
             setCurrentChannel={setCurrentChannel}
             currentChannel={currentChannel}
-            handleUnsubscribe={()=>handleUnsubscribe}>
-
-        </ChannelsComponent>
+            handleUnsubscribe={()=>handleUnsubscribe}/>
         <ChatComponent></ChatComponent>
         <ChatSendComponent></ChatSendComponent>
     </div></div>

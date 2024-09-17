@@ -13,7 +13,12 @@ export interface ChannelsComponentProps{
     currentChannel:Channel|null;
     handleUnsubscribe:(channel:Channel)=>void;
 }
-const ChannelsComponent:React.FC<ChannelsComponentProps>=({channels,currentChannel,setCurrentChannel,setChannels,handleUnsubscribe})=>{
+const ChannelsComponent:React.FC<ChannelsComponentProps>=({
+    channels,
+    currentChannel,
+    setCurrentChannel,
+    setChannels,
+    handleUnsubscribe})=>{
    
     useEffect(()=>{
         EventBus.subscribe(SUBSCRIBE_COMMAND_RESULT_U,()=>{});//onSubscribeResultU);
@@ -48,8 +53,7 @@ const ChannelsComponent:React.FC<ChannelsComponentProps>=({channels,currentChann
                                     key={channel.id} 
                                     channel={channel} 
                                     onUnsubscribe={()=>handleUnsubscribe(channel)}
-                                    onOpenChat={()=>handleOpenChat(channel)}>
-                                </ChannelComponent>
+                                    onOpenChat={()=>handleOpenChat(channel)}/>
                             ))}
                           </div>
                   </div>

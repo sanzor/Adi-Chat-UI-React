@@ -5,8 +5,8 @@ import ChatSendComponent from "./ChatSendComponent";
 import '../css/specific.css';
 import '../css/general.css';
 import { SubscribeCommandResultDto } from "../Dtos/SocketCommandResults/SubscribeCommandResultDto";
-import { ADD_CHANNEL, REFRESH_CHANNELS_COMMAND_RESULT, REMOVE_CHANNEL, RESET_CHAT, SET_CHAT, SUBSCRIBE_COMMAND_RESULT, UNSUBSCRIBE_COMMAND, UNSUBSCRIBE_COMMAND_RESULT } from "../Events";
-import EventBus from "./EventBus";
+import { ADD_CHANNEL, REFRESH_CHANNELS_COMMAND_RESULT, REMOVE_CHANNEL, RESET_CHAT, SET_CHAT, SUBSCRIBE_COMMAND, SUBSCRIBE_COMMAND_RESULT, UNSUBSCRIBE_COMMAND, UNSUBSCRIBE_COMMAND_RESULT } from "../Events";
+import { useEventBus } from "./EventBusContext";
 import { CHANNELS, CURRENT_CHANNEL, KIND, TOPIC_ID } from "../Constants";
 import { SubscribeCommand } from "../Domain/Commands/SubscribeCommand";
 import { getItemFromStorage, setItemInStorage } from "../Utils";
@@ -17,6 +17,7 @@ export interface MainComponentProps{
     onLogout:()=>void;
 }
 const MainComponent:React.FC<MainComponentProps> =(props)=>{
+    const EventBus=useEventBus();
     const [channels,setChannels]=useState<Channel[]>(()=>{
         const storedChannels=getItemFromStorage<Channel[]>(CHANNELS);
         return storedChannels ?storedChannels: [];
@@ -46,17 +47,18 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
     };
 
     const handleSubscribe=async()=>{
+       
         async function onOwnSubscribeResult(ev:CustomEvent,resolve:(value: SubscribeCommandResultDto | PromiseLike<SubscribeCommandResultDto>) => void,_:(reason?: any) => void){
             EventBus.unsubscribe(SUBSCRIBE_COMMAND_RESULT,(_:any)=>{
                 console.log("unsubscribed from subscribe_result");
             });
            resolve(ev.detail as SubscribeCommandResultDto);
         }
-       
+        EventBus.publishEvent("some event",{});
         var subscribeResult =await new Promise<SubscribeCommandResultDto>((resolve,reject)=>{
             console.log(KIND);
             EventBus.subscribe(SUBSCRIBE_COMMAND_RESULT,(ev:CustomEvent)=>onOwnSubscribeResult(ev,resolve,reject));
-            EventBus.publishCommand({kind:"subscribe",topic: subscribe}as SubscribeCommand);
+            EventBus.publishCommand({kind:SUBSCRIBE_COMMAND,topic: subscribe}as SubscribeCommand);
         });
         var _=await handleSubscribeResultAsync(subscribeResult);
     };
@@ -149,7 +151,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
         <div id="subscribeButtonPanel" className="panel">
             <input  id="subscribeBox" type="text" value={subscribe} onChange={(e)=>setSubscribe(e.target.value)}/>
             <label id="subscribeLabel" className="subscribeLabel" >Channel</label>
-            <button id="subscribeBtn" className="subscribeButton" type="button" onClick={handleSubscribe}>Subscribe</button>
+            <button id="subscribeBtn" className="subscribeButton" onClick={handleSubscribe}>Subscribe</button>
         </div> 
         <ChannelsComponent 
             channels={channels}  

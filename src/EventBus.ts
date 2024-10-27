@@ -4,6 +4,7 @@ class EventBus {
   private events: { [key: string]: EventCallback[] } = {};
 
   subscribe(event: string, callback: EventCallback) {
+    console.log("subscribe");
     if (!this.events[event]) {
       this.events[event] = [];
     }

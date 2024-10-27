@@ -1,7 +1,5 @@
-import React, { createContext, useContext, useEffect, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, ReactNode, useCallback } from 'react';
 import { connect,disconnect } from './Websocket'; // Adjust the import path as needed
-import EventBus from './EventBus';
-import { Command } from '../Domain/Commands/Command';
 
 
 interface WebSocketContextType {
@@ -16,6 +14,7 @@ export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children 
   const disconnectWebsocket=useCallback((event:Event,callback:(data:any)=>void)=>{
       disconnect();
   },[]);
+  
   
   
   return (

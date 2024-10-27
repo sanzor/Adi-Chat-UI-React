@@ -1,6 +1,5 @@
 import { createSocketCommand } from "../Adapters/CommandAdapter";
 import { SOCKET_COMMAND } from "../Constants";
-import { ChatMessage } from "../Domain/ChatMessage";
 import { Command } from "../Domain/Commands/Command";
 import { SOCKET_CLOSED, SOCKET_RECEIVE } from "../Events";
 import EventBus from "./EventBus";
@@ -29,6 +28,8 @@ export function socketClosed(){
 function onSocketCommand(event:CustomEvent):void{
     var command:Command=event.detail;
     var socketCommand=createSocketCommand(command);
+    console.log("socket command");
+    console.log(socketCommand);
     var payload=JSON.stringify(socketCommand);
     send(payload);
 }

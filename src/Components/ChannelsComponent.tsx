@@ -3,9 +3,9 @@ import { SUBSCRIBE_COMMAND_RESULT_U,
          SET_CHAT,
          ADD_CHANNEL
 } from "../Events";
-import EventBus from "./EventBus";
 import { Channel } from "../Domain/Channel";
 import ChannelComponent from "./ChannelComponent";
+import { useEventBus } from "./EventBusContext";
 export interface ChannelsComponentProps{
     channels:Channel[],
     setChannels:React.Dispatch<React.SetStateAction<Channel[]>>,
@@ -19,7 +19,7 @@ const ChannelsComponent:React.FC<ChannelsComponentProps>=({
     setCurrentChannel,
     setChannels,
     handleUnsubscribe})=>{
-   
+   const EventBus=useEventBus()
     useEffect(()=>{
         EventBus.subscribe(SUBSCRIBE_COMMAND_RESULT_U,()=>{});//onSubscribeResultU);
     },[]);

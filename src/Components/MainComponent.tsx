@@ -13,10 +13,20 @@ import { getItemFromStorage, setItemInStorage } from "../Utils";
 import { Channel } from "../Domain/Channel";
 import { UnsubscribeCommandResultDto } from "../Dtos/SocketCommandResults/UnsubscrirbeCommandResultDto";
 import { UnsubscribeCommand } from "../Domain/Commands/UnsubscribeCommand";
+import config from "../Config";
+import { connect } from "../Websocket/Websocket";
 export interface MainComponentProps{
     onLogout:()=>void;
 }
 const MainComponent:React.FC<MainComponentProps> =(props)=>{
+    const get_url=function (){
+        var user=JSON.parse(localStorage.user);
+        var url= `${config.baseWsUrl}/ws/id/${user.id}`;
+        console.log("Url:"+url);
+        return url;
+    };
+    const url=get_url();
+    connect(url);
     const EventBus=useEventBus();
     const [channels,setChannels]=useState<Channel[]>(()=>{
         const storedChannels=getItemFromStorage<Channel[]>(CHANNELS);
@@ -136,7 +146,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
                 return newChannels; // Ensure that a valid Channel[] is returned
               });
         };  
-
+   
     return (
     <>
     <div id="parentPanel" className="parent">

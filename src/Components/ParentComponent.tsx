@@ -46,8 +46,13 @@ const ParentComponent:FC<ParentComponentProps>=(props)=>{
     const handleLogout=()=>{
         setViewState(VIEWSTATE.LOGIN)
     };
+    const handleConnectSuccessful=():void=>{
+
+    };
+    const handleConnectFailed=():void=>{
+
+    };
     return(<>
-   
             {viewstate===VIEWSTATE.LOGIN && 
             <LoginComponent 
                     onRegister={()=>setViewState(VIEWSTATE.REGISTER)} 
@@ -60,7 +65,11 @@ const ParentComponent:FC<ParentComponentProps>=(props)=>{
                      onBackToLogin={handleBackToLogin}/>
              }
              {viewstate===VIEWSTATE.MAIN &&
-             <MainComponent onLogout={handleLogout}/>}
+             <MainComponent 
+                            onConnectSuccesful={handleConnectSuccessful}
+                            onFailedToConnect={handleConnectFailed}
+                            onLogout={handleLogout} 
+                            userdata={user}/>}
              </>);
 };
 

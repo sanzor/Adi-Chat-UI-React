@@ -10,7 +10,7 @@ export function connect(url: string): WebSocket {
     socket = new WebSocket(url);
 
     // Optional: Add default handlers for debugging
-    socket.onopen = () => console.log("WebSocket connection opened.");
+    socket.onopen = () => {console.log("WebSocket connection opened.");}
     socket.onerror = (error) => console.error("WebSocket error:", error);
   }
   return socket;

@@ -28,9 +28,7 @@ const RegisterComponent:FC<RegisterComponentProps>=(props)=>{
         }
         const succesfulData:CreateUserParams=validateResult;
         try{
-        
          var userResult:CreateUserResult=await createUserAsync(succesfulData);
-         console.log("USER CREATED !!!");
          if(userResult.result=="error"){
            setRegisterFailMessage(userResult.result);
            return;

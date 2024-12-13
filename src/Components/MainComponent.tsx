@@ -13,20 +13,25 @@ import { getItemFromStorage, setItemInStorage } from "../Utils";
 import { Channel } from "../Domain/Channel";
 import { UnsubscribeCommandResultDto } from "../Dtos/SocketCommandResults/UnsubscrirbeCommandResultDto";
 import { UnsubscribeCommand } from "../Domain/Commands/UnsubscribeCommand";
-import config from "../Config";
 import { connect } from "../Websocket/Websocket";
+import { User } from "../Domain/User";
 export interface MainComponentProps{
     onLogout:()=>void;
+    onFailedToConnect:()=>void;
+    onConnectSuccesful:()=>void;
+    userdata:User|null;
 }
 const MainComponent:React.FC<MainComponentProps> =(props)=>{
     const get_url=function (){
-        var user=JSON.parse(localStorage.user);
-        var url= `${config.baseWsUrl}/ws/id/${user.id}`;
-        console.log("Url:"+url);
-        return url;
+        var user={};
+        if(!user){
+            props.onFailedToConnect();
+        }
+        // var url= `${config.baseWsUrl}/ws/id/${user?.id}`;
+        // console.log(`Using websocket url: ${url}`);
+        return "url";
     };
-    const url=get_url();
-    connect(url);
+  
     const EventBus=useEventBus();
     const [channels,setChannels]=useState<Channel[]>(()=>{
         const storedChannels=getItemFromStorage<Channel[]>(CHANNELS);
@@ -146,7 +151,22 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
                 return newChannels; // Ensure that a valid Channel[] is returned
               });
         };  
-   
+        const url=get_url();
+    
+        const tryConnect=function (){
+            try{
+                connect(url);
+                props.onConnectSuccesful();
+                return true
+            }catch{
+                props.onFailedToConnect();
+                return false;
+            }   
+           
+        }
+        if(!tryConnect()){
+            return null;
+        }    
     return (
     <>
     <div id="parentPanel" className="parent">
@@ -171,7 +191,8 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
             handleUnsubscribe={()=>handleUnsubscribe}/>
         <ChatComponent></ChatComponent>
         <ChatSendComponent></ChatSendComponent>
-    </div></div>
+    </div>
+    </div>
     </>
     );
 };

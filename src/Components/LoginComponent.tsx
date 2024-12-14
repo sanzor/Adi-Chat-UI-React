@@ -16,7 +16,7 @@ const LoginComponent:React.FC<LoginComponentProps>=(props)=>{
     const [loginFailMessage,setLoginFailMessage]=useState('');
 
     async function getUserByEmailAsync(loginUserData:LoginUserData):Promise<User|null>{
-        var url=`/get-user-by-email?email=${loginUserData.email}&password=${loginUserData.password}`;
+        var url=`${config.baseHttpUrl}/get-user-by-email?email=${loginUserData.email}&password=${loginUserData.password}`;
         
         var result=await getDataAsync(url);
         console.log(result);
@@ -38,6 +38,8 @@ const LoginComponent:React.FC<LoginComponentProps>=(props)=>{
         if(!userResult){
             setLoginFailMessage("Invalid user , please register first");
         }
+        console.log("user result:");
+        console.log(userResult);
         props.onLoginSuccess(userResult!);
       
     };

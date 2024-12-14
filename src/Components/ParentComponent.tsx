@@ -22,6 +22,7 @@ const ParentComponent:FC<ParentComponentProps>=(props)=>{
 
     useEffect(()=>{
         const storedUser=getItemFromStorage<User>('user');
+        console.log(storedUser);
         if(storedUser){
             setUser(storedUser);
             setViewState(VIEWSTATE.MAIN)
@@ -44,6 +45,7 @@ const ParentComponent:FC<ParentComponentProps>=(props)=>{
         setViewState(VIEWSTATE.LOGIN)
     }
     const handleLogout=()=>{
+        setUser(null);
         setViewState(VIEWSTATE.LOGIN)
     };
     const handleConnectSuccessful=():void=>{

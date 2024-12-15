@@ -37,6 +37,7 @@ const LoginComponent:React.FC<LoginComponentProps>=(props)=>{
         var userResult=await getUserByEmailAsync({email:email,password:password});
         if(!userResult){
             setLoginFailMessage("Invalid user , please register first");
+            return;
         }
         console.log("user result:");
         console.log(userResult);

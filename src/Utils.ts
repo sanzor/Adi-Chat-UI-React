@@ -44,7 +44,6 @@ async function postDataAsync(url:string = "", data:object = {}) {
             redirect: "follow", 
             referrerPolicy: "no-referrer", 
         });
-
         // Check the response status
         if (response.ok) {
             // Status code in the range 200-299
@@ -65,7 +64,7 @@ async function postDataAsync(url:string = "", data:object = {}) {
                     break;
                 case 404:
                     console.error("Not Found (404): The requested resource could not be found.");
-                    return 404;
+                    return null;
                 case 500:
                     console.error("Internal Server Error (500): The server encountered an unexpected condition.");
                     break;

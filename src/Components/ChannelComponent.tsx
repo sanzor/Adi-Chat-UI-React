@@ -1,5 +1,4 @@
-import EventBus from "./EventBus";
-import React ,{useState,useEffect} from 'react';
+import React ,{} from 'react';
 import { Channel } from "../Domain/Channel";
 
 interface ChannelComponentProps{

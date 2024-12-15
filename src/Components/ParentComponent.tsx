@@ -32,6 +32,7 @@ const ParentComponent:FC<ParentComponentProps>=(props)=>{
     },[]);
    
     const handleLoginSuccessful=(user:User):void=>{
+        console.log(`Login succesful..Setting user to :${user}`);
         setUser(user);
         setItemInStorage<User>('user',user);
         setViewState(VIEWSTATE.MAIN)

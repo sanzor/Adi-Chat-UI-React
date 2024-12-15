@@ -62,14 +62,13 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
     };
 
     const handleSubscribe=async()=>{
-       
+        console.log("inside subscribe");
         async function onOwnSubscribeResult(ev:CustomEvent,resolve:(value: SubscribeCommandResultDto | PromiseLike<SubscribeCommandResultDto>) => void,_:(reason?: any) => void){
             EventBus.unsubscribe(SUBSCRIBE_COMMAND_RESULT,(_:any)=>{
                 console.log("unsubscribed from subscribe_result");
             });
            resolve(ev.detail as SubscribeCommandResultDto);
-        }
-        EventBus.publishEvent("some event",{});
+        };
         var subscribeResult =await new Promise<SubscribeCommandResultDto>((resolve,reject)=>{
             console.log(KIND);
             EventBus.subscribe(SUBSCRIBE_COMMAND_RESULT,(ev:CustomEvent)=>onOwnSubscribeResult(ev,resolve,reject));

@@ -1,4 +1,6 @@
 
+import { json } from "stream/consumers";
+import { SOCKET_COMMAND } from "../Constants";
 import { Command } from "../Domain/Commands/Command";
 
 type EventCallback = (data: any) => void;
@@ -23,8 +25,9 @@ export class EventBus {
     this.eventBus.dispatchEvent(customEvent);
   }
   publishCommand(command:Command){
-     console.log("publishing command....")
-     const customEvent=new CustomEvent(command.kind,{detail:command});
+     console.log(`publishing command ${JSON.stringify(command)}`);
+     const customEvent=new CustomEvent(SOCKET_COMMAND,{detail:command});
+     console.log(JSON.stringify(customEvent));
      return this.eventBus.dispatchEvent(customEvent);
   }
 }

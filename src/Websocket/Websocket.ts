@@ -5,13 +5,13 @@ let socket: WebSocket | null = null;
  * Connects to the WebSocket server and returns the WebSocket instance.
  */
 export function connect(url: string): WebSocket {
-  console.log("Connecting using url:"+url);
+  console.log(`Connecting using url:${url}`);
   if (!socket || socket.readyState === WebSocket.CLOSED) {
     socket = new WebSocket(url);
 
     // Optional: Add default handlers for debugging
     socket.onopen = () => {console.log("WebSocket connection opened.");}
-    socket.onerror = (error) => console.error("WebSocket error:", error);
+    socket.onerror = (error) => console.error(`WebSocket error:${error}`);
   }
   return socket;
 }

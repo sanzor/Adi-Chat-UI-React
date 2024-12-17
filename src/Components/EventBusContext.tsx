@@ -1,16 +1,16 @@
 // EventBusContext.tsx
-import React, { createContext, useContext } from 'react';
-import EventBus from './EventBus'; // Import the singleton instance
-
+import React, { createContext, useContext } from 'react';// Import the singleton instance
+import { EventBus } from './EventBus';
+const eventBusInstance = new EventBus();
 // Define a type for the EventBus instance
-type EventBusType = typeof EventBus;
+type EventBusType = EventBus;
 
 // Create the context with the EventBus instance type
 const EventBusContext = createContext<EventBusType | undefined>(undefined);
 
 export const EventBusProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <EventBusContext.Provider value={EventBus}>
+    <EventBusContext.Provider value={eventBusInstance}>
       {children}
     </EventBusContext.Provider>
   );

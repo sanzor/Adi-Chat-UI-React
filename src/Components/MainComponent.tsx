@@ -32,7 +32,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
         return "url";
     };
   
-    const EventBus=useEventBus();
+    const eventBus=useEventBus();
     const [channels,setChannels]=useState<Channel[]>(()=>{
         const storedChannels=getItemFromStorage<Channel[]>(CHANNELS);
         return storedChannels ?storedChannels: [];
@@ -56,7 +56,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
 
     const handleLogout=()=>{
         console.log("closing socket...");
-        EventBus.publishEvent("close_socket",{});
+        eventBus.publishEvent("close_socket",{});
         localStorage.removeItem("user");
         props.onLogout();
     };
@@ -64,15 +64,15 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
     const handleSubscribe=async()=>{
         console.log("inside subscribe");
         async function onOwnSubscribeResult(ev:CustomEvent,resolve:(value: SubscribeCommandResultDto | PromiseLike<SubscribeCommandResultDto>) => void,_:(reason?: any) => void){
-            EventBus.unsubscribe(SUBSCRIBE_COMMAND_RESULT,(_:any)=>{
+            console.log(`On subscribe result: ${ev.detail}`);
+            eventBus.unsubscribe(SUBSCRIBE_COMMAND_RESULT,(_:any)=>{
                 console.log("unsubscribed from subscribe_result");
             });
            resolve(ev.detail as SubscribeCommandResultDto);
         };
         var subscribeResult =await new Promise<SubscribeCommandResultDto>((resolve,reject)=>{
-            console.log(KIND);
-            EventBus.subscribe(SUBSCRIBE_COMMAND_RESULT,(ev:CustomEvent)=>onOwnSubscribeResult(ev,resolve,reject));
-            EventBus.publishCommand({kind:SUBSCRIBE_COMMAND,topic: subscribe}as SubscribeCommand);
+            eventBus.subscribe(SUBSCRIBE_COMMAND_RESULT,(ev:CustomEvent)=>onOwnSubscribeResult(ev,resolve,reject));
+            eventBus.publishCommand({kind:SUBSCRIBE_COMMAND,topic: subscribe}as SubscribeCommand);
         });
         var _=await handleSubscribeResultAsync(subscribeResult);
     };
@@ -93,31 +93,31 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
         if(!channels.find((channel)=>channel.id===targetChannel.id)){
             const newChannelList=[...channels,targetChannel];
             setChannels(newChannelList);
-            EventBus.publishEvent(ADD_CHANNEL,targetChannel);
+            eventBus.publishEvent(ADD_CHANNEL,targetChannel);
 
 
             if(!currentChannel|| !channels.find((channel)=>channel.id===currentChannel.id)){
                 setCurrentChannel(targetChannel);
-                EventBus.publishEvent(SET_CHAT,targetChannel);
+                eventBus.publishEvent(SET_CHAT,targetChannel);
                 return;
             }
         }
         if(!firstChatSet){
             setFirstChat(true);
-            EventBus.publishEvent(SET_CHAT,targetChannel);
+            eventBus.publishEvent(SET_CHAT,targetChannel);
         }
     }
 
     const handleUnsubscribe= async function(event:CustomEvent):Promise<void>{
         var channel=event.detail;
         var unsubscribeResult=await new Promise<UnsubscribeCommandResultDto>((resolve,_)=>{
-            EventBus.subscribe(UNSUBSCRIBE_COMMAND_RESULT,(ev:CustomEvent)=>{
-                EventBus.unsubscribe(REFRESH_CHANNELS_COMMAND_RESULT,function(_:any){
+            eventBus.subscribe(UNSUBSCRIBE_COMMAND_RESULT,(ev:CustomEvent)=>{
+                eventBus.unsubscribe(REFRESH_CHANNELS_COMMAND_RESULT,function(_:any){
                     console.log("unsbuscribed from refresh_channels after unsubscribe from channel");
                 });
                 resolve(ev.detail as UnsubscribeCommandResultDto);
             });
-            EventBus.publishCommand({[KIND]:UNSUBSCRIBE_COMMAND,topicId:channel.id} as UnsubscribeCommand);
+            eventBus.publishCommand({[KIND]:UNSUBSCRIBE_COMMAND,topicId:channel.id} as UnsubscribeCommand);
         });
             var _=await handleUnsubscribeResult(unsubscribeResult); 
         };
@@ -136,15 +136,15 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
                 const newChannels = prevChannels.filter((channel) => channel.id !== unsubscribeResult.topicId);
                 // Always return an array of channels, even if it's empty
                 if (newChannels.length === 0) {
-                  EventBus.publishEvent(RESET_CHAT, {});
+                  eventBus.publishEvent(RESET_CHAT, {});
                   return newChannels; // Empty array is returned
                 }
                 // Update the current channel if needed
                 if (newChannels.every((channel) => channel.id !== unsubscribeResult.topicId)) {
-                  EventBus.publishEvent(SET_CHAT, newChannels[0]);
+                  eventBus.publishEvent(SET_CHAT, newChannels[0]);
                 }
             
-                EventBus.publishEvent(REMOVE_CHANNEL, { [TOPIC_ID]: unsubscribeResult.topicId });
+                eventBus.publishEvent(REMOVE_CHANNEL, { [TOPIC_ID]: unsubscribeResult.topicId });
                 console.log(unsubscribeResult);
             
                 return newChannels; // Ensure that a valid Channel[] is returned

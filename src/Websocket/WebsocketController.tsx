@@ -92,6 +92,7 @@ class WebSocketController {
    * Handles outgoing WebSocket commands from the EventBus.
    */
   private handleSocketCommand = (event: CustomEvent) => {
+    console.log("inside handle socket command");
     const command: Command = event.detail;
     const socketCommand = createSocketCommand(command);
     const payload = JSON.stringify(socketCommand);
@@ -107,6 +108,4 @@ class WebSocketController {
     this.disconnect();
   };
 }
-
-const webSocketController = new WebSocketController("ws://your-websocket-url");
-export default webSocketController;
+export default WebSocketController;

@@ -11,7 +11,7 @@ export function connect(url: string): WebSocket {
 
     // Optional: Add default handlers for debugging
     socket.onopen = () => {console.log("WebSocket connection opened.");}
-    socket.onerror = (error) => console.error(`WebSocket error:${error}`);
+    socket.onerror = (error) => console.error(`WebSocket error:${JSON.stringify(error)}`);
   }
   return socket;
 }

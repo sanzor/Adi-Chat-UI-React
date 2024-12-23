@@ -6,7 +6,7 @@ import { Command } from "../Domain/Commands/Command";
 import { createSocketCommand } from "../Adapters/CommandAdapter";
 import { SOCKET_CLOSED, SOCKET_RECEIVE } from "../Events";
 
-class WebSocketController {
+export class WebSocketController {
   private socket: WebSocket | null = null;
   private url: string;
 
@@ -108,4 +108,3 @@ class WebSocketController {
     this.disconnect();
   };
 }
-export default WebSocketController;

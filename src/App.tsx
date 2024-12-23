@@ -4,12 +4,16 @@ import './App.css';
 import ParentComponent from './Components/ParentComponent';
 import { EventBusProvider } from './Components/EventBusContext';
 import "./Websocket/WebsocketController";
+import { WebSocketProvider } from './Websocket/WebsocketContext';
 const  App:React.FC=()=> {
   return (
     <EventBusProvider>
-       <div className="App">
+      <WebSocketProvider>
+      <div className="App">
         <ParentComponent />
       </div>
+      </WebSocketProvider>
+       
     </EventBusProvider>
    
   );

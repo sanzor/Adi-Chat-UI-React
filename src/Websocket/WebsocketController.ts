@@ -24,7 +24,8 @@ export class WebSocketController {
    * Establishes the WebSocket connection.
    * If already connected, this does nothing.
    */
-  public connect(url?: string) {
+  public connect(url: string) {
+    console.log(`Connecting to url:${url}`)
     if (this.socket) {
       console.warn("WebSocket is already connected.");
       return;
@@ -35,7 +36,7 @@ export class WebSocketController {
     }
 
     console.log(`Connecting to WebSocket at ${this.url}...`);
-    this.initializeWebSocket();
+    this.initializeWebSocket(url);
   }
 
   /**
@@ -61,17 +62,17 @@ export class WebSocketController {
   /**
    * Reconnects the WebSocket.
    */
-  public reconnect() {
+  public reconnect(url:string) {
     console.log("Reconnecting WebSocket...");
     this.disconnect();
-    this.connect();
+    this.connect(url);
   }
 
   /**
    * Initializes the WebSocket connection and sets up handlers.
    */
-  private initializeWebSocket() {
-    this.socket = connect(this.url);
+  private initializeWebSocket(url:string) {
+    this.socket = connect(url);
 
     if (this.socket) {
       onMessage(this.socket, (message: MessageEvent) => {

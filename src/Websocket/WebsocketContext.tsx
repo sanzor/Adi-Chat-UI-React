@@ -2,7 +2,7 @@
 import {WebSocketController} from "./WebsocketController";
 import config from "../Config";
 import { createContext, useContext, useEffect } from "react";
-
+import webSocketConsumer from "./WebsocketConsumer";
 const WebSocketContext: React.Context<WebSocketController | null> = createContext<WebSocketController | null>(null);
 
 
@@ -13,17 +13,22 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Initialize the WebSocketController
   const websocketController = new WebSocketController(config.baseWsUrl);
 
-  useEffect(() => {
-    // Connect WebSocket on mount
-    websocketController.connect();
-    console.log("WebSocketController connected");
+    useEffect(() => {
+      // Connect WebSocket on mount
+      try {
+        websocketController.connect(config.baseWsUrl);
+        console.log("WebSocketController connected");
+      } catch (error) {
+        console.log("Failed to connect to ws");
+      }
+    
 
-    return () => {
-      // Disconnect WebSocket on unmount
-      websocketController.disconnect();
-      console.log("WebSocketController disconnected");
-    };
-  }, []);
+      return () => {
+        // Disconnect WebSocket on unmount
+        websocketController.disconnect();
+        console.log("WebSocketController disconnected");
+      };
+    }, []);
 
   return (
     <WebSocketContext.Provider value={websocketController}>

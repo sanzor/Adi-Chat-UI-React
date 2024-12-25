@@ -15,6 +15,7 @@ import { UnsubscribeCommandResultDto } from "../Dtos/SocketCommandResults/Unsubs
 import { UnsubscribeCommand } from "../Domain/Commands/UnsubscribeCommand";
 import { connect } from "../Websocket/Websocket";
 import { User } from "../Domain/User";
+import config from "../Config";
 export interface MainComponentProps{
     onLogout:()=>void;
     onFailedToConnect:()=>void;
@@ -22,16 +23,6 @@ export interface MainComponentProps{
     userdata:User|null;
 }
 const MainComponent:React.FC<MainComponentProps> =(props)=>{
-    const get_url=function (){
-        var user={};
-        if(!user){
-            props.onFailedToConnect();
-        }
-        // var url= `${config.baseWsUrl}/ws/id/${user?.id}`;
-        // console.log(`Using websocket url: ${url}`);
-        return "url";
-    };
-  
     const eventBus=useEventBus();
     const [channels,setChannels]=useState<Channel[]>(()=>{
         const storedChannels=getItemFromStorage<Channel[]>(CHANNELS);
@@ -44,7 +35,38 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
       });
     const [subscribe,setSubscribe]=useState('');
     const [firstChatSet,setFirstChat]=useState(false);
+    const [isConnected,setIsConnected]=useState(false);
 
+    const get_url = function () {
+        if (!props.userdata) {
+          props.onFailedToConnect();
+          return null;
+        }
+        const url = `${config.baseWsUrl}/ws/id/${props.userdata?.id}`;
+        console.log(`Using websocket url: ${url}`);
+        return url;
+      };
+    
+      const tryConnect = function (url:string) {
+        try {
+          console.log(`Trying to connect with url: ${url}`);
+          connect(url); // Replace with your WebSocket connection logic
+          props.onConnectSuccesful();
+          setIsConnected(true); // Mark as connected
+          return true;
+        } catch (error) {
+          console.error('Connection error:', error);
+          props.onFailedToConnect();
+          setIsConnected(false); // Mark as not connected
+          return false;
+        }
+      };
+    useEffect(() => {
+        const url = get_url();
+        if (url && !isConnected) {
+          tryConnect(url);
+        }
+      }, [props.userdata]);
     useEffect(()=>{
         setItemInStorage(CHANNELS,channels);
     },[channels]);
@@ -149,23 +171,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
             
                 return newChannels; // Ensure that a valid Channel[] is returned
               });
-        };  
-        const url=get_url();
-    
-        const tryConnect=function (){
-            try{
-                connect(url);
-                props.onConnectSuccesful();
-                return true
-            }catch{
-                props.onFailedToConnect();
-                return false;
-            }   
-           
-        }
-        if(!tryConnect()){
-            return null;
-        }    
+        };
     return (
     <>
     <div id="parentPanel" className="parent">

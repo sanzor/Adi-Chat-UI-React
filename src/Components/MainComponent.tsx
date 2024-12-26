@@ -49,6 +49,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
     
       const tryConnect = function (url:string) {
         try {
+        
           console.log(`Trying to connect with url: ${url}`);
           connect(url); // Replace with your WebSocket connection logic
           props.onConnectSuccesful();
@@ -62,6 +63,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
         }
       };
     useEffect(() => {
+        console.log("inside connect effect");
         const url = get_url();
         if (url && !isConnected) {
           tryConnect(url);

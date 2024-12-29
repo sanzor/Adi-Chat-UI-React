@@ -11,7 +11,7 @@ const WebSocketContext: React.Context<WebSocketController | null> = createContex
 
 export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Initialize the WebSocketController
-  const websocketController = new WebSocketController(config.baseWsUrl);
+  const websocketController = WebSocketController.getInstance();
 
     useEffect(() => {
       // Connect WebSocket on mount

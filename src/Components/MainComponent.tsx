@@ -5,7 +5,7 @@ import ChatSendComponent from "./ChatSendComponent";
 import '../css/specific.css';
 import '../css/general.css';
 import { SubscribeCommandResultDto } from "../Dtos/SocketCommandResults/SubscribeCommandResultDto";
-import { ADD_CHANNEL, REFRESH_CHANNELS_COMMAND_RESULT, REMOVE_CHANNEL, RESET_CHAT, SET_CHAT, SUBSCRIBE_COMMAND, SUBSCRIBE_COMMAND_RESULT, UNSUBSCRIBE_COMMAND, UNSUBSCRIBE_COMMAND_RESULT } from "../Events";
+import { ADD_CHANNEL, REFRESH_CHANNELS_COMMAND_RESULT, REMOVE_CHANNEL, RESET_CHAT, SET_CHAT, SOCKET_CLOSED, SUBSCRIBE_COMMAND, SUBSCRIBE_COMMAND_RESULT, UNSUBSCRIBE_COMMAND, UNSUBSCRIBE_COMMAND_RESULT } from "../Events";
 import { useEventBus } from "./EventBusContext";
 import { CHANNELS, CURRENT_CHANNEL, KIND, TOPIC_ID } from "../Constants";
 import { SubscribeCommand } from "../Domain/Commands/SubscribeCommand";
@@ -16,6 +16,7 @@ import { UnsubscribeCommand } from "../Domain/Commands/UnsubscribeCommand";
 import { connect } from "../Websocket/Websocket";
 import { User } from "../Domain/User";
 import config from "../Config";
+import { useWebSocket } from "../Websocket/WebsocketContext";
 export interface MainComponentProps{
     onLogout:()=>void;
     onFailedToConnect:()=>void;
@@ -35,40 +36,35 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
       });
     const [subscribe,setSubscribe]=useState('');
     const [firstChatSet,setFirstChat]=useState(false);
-    const [isConnected,setIsConnected]=useState(false);
-
-    const get_url = function () {
-        if (!props.userdata) {
-          props.onFailedToConnect();
-          return null;
-        }
-        const url = `${config.baseWsUrl}/ws/id/${props.userdata?.id}`;
-        console.log(`Using websocket url: ${url}`);
-        return url;
-      };
-    
-      const tryConnect = function (url:string) {
-        try {
-        
-          console.log(`Trying to connect with url: ${url}`);
-          connect(url); // Replace with your WebSocket connection logic
-          props.onConnectSuccesful();
-          setIsConnected(true); // Mark as connected
-          return true;
-        } catch (error) {
-          console.error('Connection error:', error);
-          props.onFailedToConnect();
-          setIsConnected(false); // Mark as not connected
-          return false;
-        }
-      };
+    const websocketController = useWebSocket();
     useEffect(() => {
         console.log("inside connect effect");
-        const url = get_url();
-        if (url && !isConnected) {
-          tryConnect(url);
+    
+        // Attempt connection only if `userdata` is present
+        if (!props.userdata) {
+          console.error("No user data available. Connection failed.");
+          props.onFailedToConnect();
+          return;
         }
-      }, [props.userdata]);
+    
+        // Try to connect using the WebSocketController
+        try {
+          const url = `${config.baseWsUrl}/ws/id/${props.userdata.id}`;
+          console.log(`Using WebSocket URL: ${url}`);
+          websocketController.connect(url); // Use the WebSocketController's connect method
+          console.log("WebSocket connected via controller.");
+          props.onConnectSuccesful();
+        } catch (error) {
+          console.error("Failed to connect WebSocket via controller:", error);
+          props.onFailedToConnect();
+        }
+    
+        return () => {
+          // Disconnect WebSocket on unmount
+          console.log("Cleaning up WebSocket connection...");
+          websocketController.disconnect();
+        };
+      }, [props.userdata, websocketController, props.onFailedToConnect, props.onConnectSuccesful]); // Dependencies to ensure the effect re-runs if `userdata` changes // Only re-run when `userdata` changes
     useEffect(()=>{
         setItemInStorage(CHANNELS,channels);
     },[channels]);
@@ -80,7 +76,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
 
     const handleLogout=()=>{
         console.log("closing socket...");
-        eventBus.publishEvent("close_socket",{});
+        eventBus.publishEvent(SOCKET_CLOSED,{});
         localStorage.removeItem("user");
         props.onLogout();
     };
@@ -100,80 +96,113 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
         });
         var _=await handleSubscribeResultAsync(subscribeResult);
     };
-    const handleSubscribeResultAsync= function(subscribeResult:SubscribeCommandResultDto){
-
-        console.log(subscribeResult.result);
-        if(subscribeResult.result!="ok" && subscribeResult.result!="already_subscribed"){
-            var message="Could not subscribe to channel:"+subscribe
-            console.log(message);
-            return new Error(message);
+    const handleSubscribeResultAsync = (subscribeResult: SubscribeCommandResultDto): void | Error => {
+        console.log(`Subscription result: ${subscribeResult.result}`);
+      
+        // Handle unsuccessful subscription
+        if (subscribeResult.result !== "ok" && subscribeResult.result !== "already_subscribed") {
+          const errorMessage = `Could not subscribe to channel: ${subscribe}`;
+          console.error(errorMessage);
+          return new Error(errorMessage);
         }
-        if(subscribeResult.result=='already_subscribed'){
-            console.log("already subscribed");
+      
+        // Handle already subscribed case
+        if (subscribeResult.result === "already_subscribed") {
+          console.log("Already subscribed to the channel.");
+          return;
+        }
+      
+        // Extract target channel details
+        const targetChannel: Channel = {
+          id: subscribeResult.topic!.id,
+          name: subscribeResult.topic!.name,
+        };
+      
+        // Add the channel to the state if it's new
+        if (!channels.find((channel) => channel.id === targetChannel.id)) {
+          const updatedChannels = [...channels, targetChannel];
+          setChannels(updatedChannels);
+          eventBus.publishEvent(ADD_CHANNEL, targetChannel);
+      
+          // Set the current channel if no current channel is set
+          if (!currentChannel || !channels.find((channel) => channel.id === currentChannel.id)) {
+            setCurrentChannel(targetChannel);
+            eventBus.publishEvent(SET_CHAT, targetChannel);
             return;
+          }
         }
-        var targetChannel:Channel={id:subscribeResult.topic!.id,name:subscribeResult.topic!.name}!;
-        
-        if(!channels.find((channel)=>channel.id===targetChannel.id)){
-            const newChannelList=[...channels,targetChannel];
-            setChannels(newChannelList);
-            eventBus.publishEvent(ADD_CHANNEL,targetChannel);
-
-
-            if(!currentChannel|| !channels.find((channel)=>channel.id===currentChannel.id)){
-                setCurrentChannel(targetChannel);
-                eventBus.publishEvent(SET_CHAT,targetChannel);
-                return;
-            }
+      
+        // Set the first chat if it's not set yet
+        if (!firstChatSet) {
+          setFirstChat(true);
+          eventBus.publishEvent(SET_CHAT, targetChannel);
         }
-        if(!firstChatSet){
-            setFirstChat(true);
-            eventBus.publishEvent(SET_CHAT,targetChannel);
+      };
+    const handleUnsubscribe = async (event: CustomEvent): Promise<void> => {
+        const channel = event.detail;
+      
+        try {
+          const unsubscribeResult = await new Promise<UnsubscribeCommandResultDto>((resolve, reject) => {
+            // Subscribe to the UNSUBSCRIBE_COMMAND_RESULT event
+            const onUnsubscribeResult = (ev: CustomEvent) => {
+              eventBus.unsubscribe(REFRESH_CHANNELS_COMMAND_RESULT, onUnsubscribeResult);
+              resolve(ev.detail as UnsubscribeCommandResultDto);
+            };
+      
+            eventBus.subscribe(UNSUBSCRIBE_COMMAND_RESULT, onUnsubscribeResult);
+      
+            // Publish the UNSUBSCRIBE command
+            eventBus.publishCommand({
+              [KIND]: UNSUBSCRIBE_COMMAND,
+              topicId: channel.id,
+            } as UnsubscribeCommand);
+          });
+      
+          // Handle the unsubscribe result
+          await handleUnsubscribeResult(unsubscribeResult);
+        } catch (error) {
+          console.error("Unsubscription failed:", error);
         }
-    }
+      };
 
-    const handleUnsubscribe= async function(event:CustomEvent):Promise<void>{
-        var channel=event.detail;
-        var unsubscribeResult=await new Promise<UnsubscribeCommandResultDto>((resolve,_)=>{
-            eventBus.subscribe(UNSUBSCRIBE_COMMAND_RESULT,(ev:CustomEvent)=>{
-                eventBus.unsubscribe(REFRESH_CHANNELS_COMMAND_RESULT,function(_:any){
-                    console.log("unsbuscribed from refresh_channels after unsubscribe from channel");
-                });
-                resolve(ev.detail as UnsubscribeCommandResultDto);
-            });
-            eventBus.publishCommand({[KIND]:UNSUBSCRIBE_COMMAND,topicId:channel.id} as UnsubscribeCommand);
+      const handleUnsubscribeResult = async (unsubscribeResult: UnsubscribeCommandResultDto): Promise<void> => {
+        console.log(`Unsubscribe result: ${unsubscribeResult.result}`);
+      
+        // Handle unsuccessful unsubscription
+        if (unsubscribeResult.result === "not_joined") {
+          console.warn("Cannot unsubscribe: not joined to the channel.");
+          return;
+        }
+      
+        if (unsubscribeResult.result !== "ok") {
+          const errorMessage = "Could not unsubscribe from channel.";
+          console.error(errorMessage);
+          throw new Error(errorMessage);
+        }
+      
+        // Remove the channel from the list
+        setChannels((prevChannels: Channel[]) => {
+          const updatedChannels = prevChannels.filter((channel) => channel.id !== unsubscribeResult.topicId);
+      
+          // If there are no channels left, reset the chat
+          if (updatedChannels.length === 0) {
+            eventBus.publishEvent(RESET_CHAT, {});
+            return [];
+          }
+      
+          // Update the current channel if necessary
+          if (currentChannel && currentChannel.id === unsubscribeResult.topicId) {
+            setCurrentChannel(updatedChannels[0]); // Set to the first channel in the updated list
+            eventBus.publishEvent(SET_CHAT, updatedChannels[0]);
+          }
+      
+          eventBus.publishEvent(REMOVE_CHANNEL, { [TOPIC_ID]: unsubscribeResult.topicId });
+          console.log("Channel removed:", unsubscribeResult.topicId);
+      
+          return updatedChannels;
         });
-            var _=await handleUnsubscribeResult(unsubscribeResult); 
-        };
+      };
 
-    const handleUnsubscribeResult=async function(unsubscribeResult:UnsubscribeCommandResultDto):Promise<any>{
-            console.log(unsubscribeResult);
-            if(unsubscribeResult.result=="not_joined"){
-                console.log("Not joined");
-                return "not_joined";
-            }
-            if(unsubscribeResult.result!="ok"){
-                var message="Could not unsubscribe from channel";
-                return new Error(message);
-            }
-            setChannels((prevChannels: Channel[]) => {
-                const newChannels = prevChannels.filter((channel) => channel.id !== unsubscribeResult.topicId);
-                // Always return an array of channels, even if it's empty
-                if (newChannels.length === 0) {
-                  eventBus.publishEvent(RESET_CHAT, {});
-                  return newChannels; // Empty array is returned
-                }
-                // Update the current channel if needed
-                if (newChannels.every((channel) => channel.id !== unsubscribeResult.topicId)) {
-                  eventBus.publishEvent(SET_CHAT, newChannels[0]);
-                }
-            
-                eventBus.publishEvent(REMOVE_CHANNEL, { [TOPIC_ID]: unsubscribeResult.topicId });
-                console.log(unsubscribeResult);
-            
-                return newChannels; // Ensure that a valid Channel[] is returned
-              });
-        };
     return (
     <>
     <div id="parentPanel" className="parent">

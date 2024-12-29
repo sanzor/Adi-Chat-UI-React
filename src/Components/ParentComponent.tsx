@@ -8,6 +8,7 @@ import '../css/specific.css';
 import '../css/general.css';
 import '../css/chat.css';
 import '../css/channels.css'
+import { useEventBus } from "./EventBusContext";
 export interface ParentComponentProps{
 
 };
@@ -18,8 +19,7 @@ enum VIEWSTATE{
 }
 const ParentComponent:FC<ParentComponentProps>=(props)=>{
     const [user,setUser]=useState<User|null>(null);
-    const [viewstate,setViewState]=useState<VIEWSTATE>(VIEWSTATE.LOGIN)
-
+    const [viewstate,setViewState]=useState<VIEWSTATE>(VIEWSTATE.LOGIN);
     useEffect(()=>{
         const storedUser=getItemFromStorage<User>('user');
         console.log(storedUser);

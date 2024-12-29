@@ -15,7 +15,6 @@ export interface ChannelsComponentProps{
 }
 const ChannelsComponent:React.FC<ChannelsComponentProps>=({
     channels,
-    currentChannel,
     setCurrentChannel,
     setChannels,
     handleUnsubscribe})=>{
@@ -42,6 +41,11 @@ const ChannelsComponent:React.FC<ChannelsComponentProps>=({
         setCurrentChannel(channel);
         EventBus.publishEvent(SET_CHAT, channel);
       };
+
+    const internalUnsubscribe=(channel:Channel)=>{
+        console.log(`Triggering unsubscribe for channel:${channel}`);
+        handleUnsubscribe(channel);
+    };
     return(
     <>
        <div id="channelsPanel" className="channelsPanel">
@@ -52,7 +56,7 @@ const ChannelsComponent:React.FC<ChannelsComponentProps>=({
                                 <ChannelComponent
                                     key={channel.id} 
                                     channel={channel} 
-                                    onUnsubscribe={()=>handleUnsubscribe(channel)}
+                                    onUnsubscribe={internalUnsubscribe}
                                     onOpenChat={()=>handleOpenChat(channel)}/>
                             ))}
                           </div>

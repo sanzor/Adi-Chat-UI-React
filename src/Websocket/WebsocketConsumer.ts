@@ -1,17 +1,17 @@
 // WebSocketConsumer.ts
 
+import { EventBus } from "../Components/EventBus";
 import { SOCKET_CLOSED, SOCKET_RECEIVE } from "../Events";
-import EventBus from "../Components/EventBus";
 import messageService from "./MessageService";
 
 
-class WebSocketConsumer {
-  constructor() {
+export class WebSocketConsumer {
+  constructor(private eventBus:EventBus) {
     // Subscribe to incoming messages from EventBus
-    EventBus.subscribe(SOCKET_RECEIVE, this.onSocketMessage);
+    eventBus.subscribe(SOCKET_RECEIVE, this.onSocketMessage);
 
     // Subscribe to WebSocket closure events
-    EventBus.subscribe(SOCKET_CLOSED, this.onSocketClosed);
+    eventBus.subscribe(SOCKET_CLOSED, this.onSocketClosed);
   }
 
   private onSocketMessage = (event: CustomEvent) => {
@@ -26,6 +26,3 @@ class WebSocketConsumer {
     // Handle WebSocket closure logic here if needed
   };
 }
-
-const webSocketConsumer = new WebSocketConsumer();
-export default webSocketConsumer;

@@ -39,8 +39,6 @@ const LoginComponent:React.FC<LoginComponentProps>=(props)=>{
             setLoginFailMessage("Invalid user , please register first");
             return;
         }
-        console.log("user result:");
-        console.log(userResult);
         props.onLoginSuccess(userResult!);
       
     };

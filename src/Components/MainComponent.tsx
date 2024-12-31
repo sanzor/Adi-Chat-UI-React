@@ -43,28 +43,11 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
         // Attempt connection only if `userdata` is present
         if (!props.userdata) {
           console.error("No user data available. Connection failed.");
-          props.onFailedToConnect();
           return;
         }
     
-        // Try to connect using the WebSocketController
-        try {
-          const url = `${config.baseWsUrl}/ws/id/${props.userdata.id}`;
-          console.log(`Using WebSocket URL: ${url}`);
-          websocketController.connect(url); // Use the WebSocketController's connect method
-          console.log("WebSocket connected via controller.");
-          props.onConnectSuccesful();
-        } catch (error) {
-          console.error("Failed to connect WebSocket via controller:", error);
-          props.onFailedToConnect();
-        }
-    
-        return () => {
-          // Disconnect WebSocket on unmount
-          console.log("Cleaning up WebSocket connection...");
-          websocketController.disconnect();
-        };
-      }, [props.userdata, websocketController, props.onFailedToConnect, props.onConnectSuccesful]); // Dependencies to ensure the effect re-runs if `userdata` changes // Only re-run when `userdata` changes
+        
+      }, [props.userdata, websocketController]); // Dependencies to ensure the effect re-runs if `userdata` changes // Only re-run when `userdata` changes
     useEffect(()=>{
         setItemInStorage(CHANNELS,channels);
     },[channels]);

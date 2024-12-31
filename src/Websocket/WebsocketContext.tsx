@@ -1,38 +1,36 @@
+import React, { createContext, useContext, useEffect, useRef } from "react";
 
-import {WebSocketController} from "./WebsocketController";
+import { useEventBus } from "../Components/EventBusContext";
 import config from "../Config";
-import { createContext, useContext, useEffect } from "react";
-import webSocketConsumer from "./WebsocketConsumer";
-const WebSocketContext: React.Context<WebSocketController | null> = createContext<WebSocketController | null>(null);
+import { WebSocketController } from "./WebsocketController";
+import { WebSocketConsumer } from "./WebsocketConsumer";
 
-
-
-// Define the WebSocketContext
+const WebSocketContext = createContext<WebSocketController | undefined>(undefined);
 
 export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Initialize the WebSocketController
-  const websocketController = WebSocketController.getInstance();
+  const eventBus = useEventBus();
+  const controllerRef = useRef<WebSocketController>();
+  const consumerRef=useRef<WebSocketConsumer>();
 
-    useEffect(() => {
-      // Connect WebSocket on mount
-      try {
-        websocketController.connect(config.baseWsUrl);
-        console.log("WebSocketController connected");
-      } catch (error) {
-        console.log("Failed to connect to ws");
-      }
-    
+  if (!controllerRef.current) {
+    controllerRef.current = new WebSocketController(eventBus); // Instantiate here
+  }
 
-      return () => {
-        // Disconnect WebSocket on unmount
-        websocketController.disconnect();
-        console.log("WebSocketController disconnected");
-      };
-    }, []);
+  const websocketController = controllerRef.current;
+  if (!consumerRef.current) {
+    consumerRef.current = new WebSocketConsumer(eventBus);
+  }
+  useEffect(() => {
+    websocketController.connect(config.baseWsUrl);
+
+    return () => {
+      websocketController.disconnect();
+    };
+  }, [websocketController]);
 
   return (
     <WebSocketContext.Provider value={websocketController}>
-        {children}
+      {children}
     </WebSocketContext.Provider>
   );
 };

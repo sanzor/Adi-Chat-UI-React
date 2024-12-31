@@ -1,4 +1,4 @@
-Chat UI client developed in React for the AdiChat Erlang server
+Chat UI client developed in React for the [AdiChat Erlang server](https://github.com/sanzor/AdiChat)
 
 Developed initially in Vanilla JS, moved to Typescript and then to React
 

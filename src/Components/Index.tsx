@@ -1,6 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import ParentComponent from './ParentComponent';
+import App from '../App';
 // import '../css/index.css';
 // import '../css/general.css';
 // import '../css/specific.css';
@@ -10,7 +10,7 @@ if(container){
     const root=createRoot(container);
     root.render(
         <React.StrictMode>
-            <ParentComponent></ParentComponent>
+           <App></App>
         </React.StrictMode>
     )
 }

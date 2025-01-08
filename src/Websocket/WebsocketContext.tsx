@@ -1,41 +1,115 @@
-import React, { createContext, useContext, useEffect, useRef } from "react";
-
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useEventBus } from "../Components/EventBusContext";
 import config from "../Config";
 import { WebSocketController } from "./WebsocketController";
 import { WebSocketConsumer } from "./WebsocketConsumer";
+import { User } from "../Domain/User";
 
-const WebSocketContext = createContext<WebSocketController | undefined>(undefined);
+// Define the shape of the WebSocket state
+interface WebSocketState {
+  isConnected: boolean;
+  isConnecting: boolean;
+  hasFailed: boolean;
+}
 
-export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+// Extend the context to include the WebSocket state
+interface WebSocketContextValue {
+  controller: WebSocketController;
+  state: WebSocketState;
+}
+
+const WebSocketContext = createContext<WebSocketContextValue | undefined>(undefined);
+
+export const WebSocketProvider: React.FC<{
+  children: React.ReactNode;
+  onConnectSuccessful?: () => void;
+  onConnectFailed?: () => void;
+  user:User|null;
+}> = ({ children, onConnectSuccessful, onConnectFailed,user }) => {
   const eventBus = useEventBus();
   const controllerRef = useRef<WebSocketController>();
-  const consumerRef=useRef<WebSocketConsumer>();
+  const consumerRef = useRef<WebSocketConsumer>();
 
+  // Track connection state
+  const [state, setState] = useState<WebSocketState>({
+    isConnected: false,
+    isConnecting: false,
+    hasFailed: false,
+  });
+
+  // Initialize WebSocketController
   if (!controllerRef.current) {
-    controllerRef.current = new WebSocketController(eventBus); // Instantiate here
+    controllerRef.current = new WebSocketController(eventBus);
   }
 
   const websocketController = controllerRef.current;
+
+  // Initialize WebSocketConsumer
   if (!consumerRef.current) {
     consumerRef.current = new WebSocketConsumer(eventBus);
   }
-  useEffect(() => {
-    websocketController.connect(config.baseWsUrl);
 
-    return () => {
-      websocketController.disconnect();
-    };
-  }, [websocketController]);
+  useEffect(() => {
+    if (!user) {
+      console.log("WebSocketProvider: User is not set. Skipping connection.");
+      return;
+    }
+    console.log("WebSocketProvider: Connecting WebSocket...");
+    setState({ isConnecting: true, isConnected: false, hasFailed: false });
+    const url = `${config.baseWsUrl}/ws/id/${user.id}`
+    try {
+      websocketController.connect(url);
+  
+      const handleConnected = () => {
+        console.log("WebSocketProvider: Connection successful.");
+        setState({ isConnecting: false, isConnected: true, hasFailed: false });
+        if (onConnectSuccessful) {
+          onConnectSuccessful();
+        }
+      };
+  
+      const handleConnectionFailed = () => {
+        console.error("WebSocketProvider: Connection failed.");
+        setState({ isConnecting: false, isConnected: false, hasFailed: true });
+        if (onConnectFailed) {
+          onConnectFailed();
+        }
+      };
+  
+      const handleDisconnected = () => {
+        console.log("WebSocketProvider: Connection closed.");
+        setState({ isConnecting: false, isConnected: false, hasFailed: false });
+      };
+  
+      eventBus.subscribe("WEBSOCKET_CONNECTED", handleConnected);
+      eventBus.subscribe("WEBSOCKET_CONNECTION_FAILED", handleConnectionFailed);
+      eventBus.subscribe("WEBSOCKET_DISCONNECTED", handleDisconnected);
+  
+      return () => {
+        console.log("WebSocketProvider: Cleaning up...");
+        websocketController.disconnect();
+        eventBus.unsubscribe("WEBSOCKET_CONNECTED", handleConnected);
+        eventBus.unsubscribe("WEBSOCKET_CONNECTION_FAILED", handleConnectionFailed);
+        eventBus.unsubscribe("WEBSOCKET_DISCONNECTED", handleDisconnected);
+      };
+    } catch (error) {
+      console.error("WebSocketProvider: Error during connection:", error);
+      setState({ isConnecting: false, isConnected: false, hasFailed: true });
+      if (onConnectFailed) {
+        onConnectFailed();
+      }
+    }
+  }, [websocketController, onConnectSuccessful, onConnectFailed, eventBus]);
 
   return (
-    <WebSocketContext.Provider value={websocketController}>
+    <WebSocketContext.Provider value={{ controller: websocketController, state }}>
       {children}
     </WebSocketContext.Provider>
   );
 };
 
-export const useWebSocket = (): WebSocketController => {
+// Hook to access WebSocketController and connection state
+export const useWebSocket = (): WebSocketContextValue => {
   const context = useContext(WebSocketContext);
   if (!context) {
     throw new Error("useWebSocket must be used within a WebSocketProvider");

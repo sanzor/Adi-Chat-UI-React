@@ -13,14 +13,9 @@ import { getItemFromStorage, setItemInStorage } from "../Utils";
 import { Channel } from "../Domain/Channel";
 import { UnsubscribeCommandResultDto } from "../Dtos/SocketCommandResults/UnsubscrirbeCommandResultDto";
 import { UnsubscribeCommand } from "../Domain/Commands/UnsubscribeCommand";
-import { connect } from "../Websocket/Websocket";
 import { User } from "../Domain/User";
-import config from "../Config";
-import { useWebSocket } from "../Websocket/WebsocketContext";
 export interface MainComponentProps{
     onLogout:()=>void;
-    onFailedToConnect:()=>void;
-    onConnectSuccesful:()=>void;
     userdata:User|null;
 }
 const MainComponent:React.FC<MainComponentProps> =(props)=>{
@@ -36,18 +31,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
       });
     const [subscribe,setSubscribe]=useState('');
     const [firstChatSet,setFirstChat]=useState(false);
-    const websocketController = useWebSocket();
-    useEffect(() => {
-        console.log("inside connect effect");
-    
-        // Attempt connection only if `userdata` is present
-        if (!props.userdata) {
-          console.error("No user data available. Connection failed.");
-          return;
-        }
-    
-        
-      }, [props.userdata, websocketController]); // Dependencies to ensure the effect re-runs if `userdata` changes // Only re-run when `userdata` changes
+ // Dependencies to ensure the effect re-runs if `userdata` changes // Only re-run when `userdata` changes
     useEffect(()=>{
         setItemInStorage(CHANNELS,channels);
     },[channels]);

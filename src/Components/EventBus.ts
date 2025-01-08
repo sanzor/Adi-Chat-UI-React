@@ -27,7 +27,6 @@
     publishCommand(command:Command){
       console.log(`publishing command ${JSON.stringify(command)}`);
       const customEvent=new CustomEvent(SOCKET_COMMAND,{detail:command});
-      console.log(JSON.stringify(customEvent));
       return this.eventBus.dispatchEvent(customEvent);
     }
   }

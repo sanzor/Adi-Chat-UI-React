@@ -5,7 +5,7 @@ import ChatSendComponent from "./ChatSendComponent";
 import '../css/specific.css';
 import '../css/general.css';
 import { SubscribeCommandResultDto } from "../Dtos/SocketCommandResults/SubscribeCommandResultDto";
-import { ADD_CHANNEL, REFRESH_CHANNELS_COMMAND_RESULT, REMOVE_CHANNEL, RESET_CHAT, SET_CHAT, SOCKET_CLOSED, SUBSCRIBE_COMMAND, SUBSCRIBE_COMMAND_RESULT, UNSUBSCRIBE_COMMAND, UNSUBSCRIBE_COMMAND_RESULT } from "../Events";
+import { ADD_CHANNEL, REFRESH_CHANNELS_COMMAND_RESULT, REMOVE_CHANNEL, RESET_CHAT, SET_CHAT, SOCKET_CLOSED, SUBSCRIBE_COMMAND, SUBSCRIBE_COMMAND_RESULT, SUBSCRIBE_COMMAND_RESULT_COMPONENT, UNSUBSCRIBE_COMMAND, UNSUBSCRIBE_COMMAND_RESULT } from "../Events";
 import { useEventBus } from "./EventBusContext";
 import { CHANNELS, CURRENT_CHANNEL, KIND, TOPIC_ID } from "../Constants";
 import { SubscribeCommand } from "../Domain/Commands/SubscribeCommand";
@@ -52,13 +52,13 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
         console.log("inside subscribe");
         async function onOwnSubscribeResult(ev:CustomEvent,resolve:(value: SubscribeCommandResultDto | PromiseLike<SubscribeCommandResultDto>) => void,_:(reason?: any) => void){
             console.log(`On subscribe result: ${ev.detail}`);
-            eventBus.unsubscribe(SUBSCRIBE_COMMAND_RESULT,(_:any)=>{
+            eventBus.unsubscribe(SUBSCRIBE_COMMAND_RESULT_COMPONENT,(_:any)=>{
                 console.log("unsubscribed from subscribe_result");
             });
            resolve(ev.detail as SubscribeCommandResultDto);
         };
         var subscribeResult =await new Promise<SubscribeCommandResultDto>((resolve,reject)=>{
-            eventBus.subscribe(SUBSCRIBE_COMMAND_RESULT,(ev:CustomEvent)=>onOwnSubscribeResult(ev,resolve,reject));
+            eventBus.subscribe(SUBSCRIBE_COMMAND_RESULT_COMPONENT,(ev:CustomEvent)=>onOwnSubscribeResult(ev,resolve,reject));
             eventBus.publishCommand({kind:SUBSCRIBE_COMMAND,topic: subscribe}as SubscribeCommand);
         });
         var _=await handleSubscribeResultAsync(subscribeResult);

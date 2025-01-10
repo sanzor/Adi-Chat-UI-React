@@ -8,6 +8,23 @@ import { close, connect, onClose, onMessage, send } from "./Websocket";
 export class WebSocketController {
   private socket: WebSocket | null = null;
   private isRetrying: boolean = false;
+  public getConnectionState(): string {
+    if (!this.socket) {
+      return "CLOSED";
+    }
+    switch (this.socket.readyState) {
+      case WebSocket.CONNECTING:
+        return "CONNECTING";
+      case WebSocket.OPEN:
+        return "OPEN";
+      case WebSocket.CLOSING:
+        return "CLOSING";
+      case WebSocket.CLOSED:
+        return "CLOSED";
+      default:
+        return "UNKNOWN";
+    }
+  }
 
   constructor(private eventBus: EventBus) {
     this.eventBus.subscribe(SOCKET_COMMAND, this.handleSocketCommand);
@@ -96,7 +113,9 @@ export class WebSocketController {
 
   private handleSocketCommand = (event: CustomEvent): void => {
     if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
+      console.log(this.socket?.readyState);
       console.error("WebSocketController: Cannot send command, WebSocket is not connected.");
+     
       return;
     }
 

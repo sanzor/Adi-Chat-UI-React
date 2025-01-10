@@ -39,7 +39,10 @@ export const WebSocketProvider: React.FC<{
 
   // Initialize WebSocketController
   if (!controllerRef.current) {
+    console.log("Initializing WebSocketController...");
     controllerRef.current = new WebSocketController(eventBus);
+  } else {
+    console.log("Using existing WebSocketController instance...");
   }
 
   const websocketController = controllerRef.current;

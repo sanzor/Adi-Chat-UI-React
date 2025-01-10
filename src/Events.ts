@@ -17,6 +17,7 @@ const CHANNEL_CLICK:string="channel_click";
 const UNSUBSCRIBE_COMMAND_RESULT:string="unsubscribe_result";
 const UNSUBSCRIBE_COMMAND_RESULT_U:string="unsubscribe_result_u";
 const SUBSCRIBE_COMMAND_RESULT:string="subscribe_result";
+const SUBSCRIBE_COMMAND_RESULT_COMPONENT:string="subscribe_result_component";
 const SUBSCRIBE_COMMAND_RESULT_U:string="subscribe_result_u";
 
 const SOCKET_RECEIVE:string="socketReceive";
@@ -60,6 +61,7 @@ export {
 
     SUBSCRIBE_COMMAND,
     SUBSCRIBE_COMMAND_RESULT,
+    SUBSCRIBE_COMMAND_RESULT_COMPONENT,
     SUBSCRIBE_COMMAND_RESULT_U,
     SOCKET_RECEIVE,
     SOCKET_CLOSED,

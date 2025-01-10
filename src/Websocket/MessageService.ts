@@ -15,7 +15,8 @@ import {
     SUBSCRIBE_COMMAND_RESULT,
     UNSUBSCRIBE_COMMAND_RESULT,
     UNSUBSCRIBE_COMMAND_RESULT_U,
-    RESET_CHAT
+    RESET_CHAT,
+    SUBSCRIBE_COMMAND_RESULT_COMPONENT
 } from "../Events";
 
 class MessageService {
@@ -79,8 +80,8 @@ class MessageService {
   }
 
   private handleSubscribeCommandResult(data: any) {
-    console.log("Subscribe command result:", data);
-    EventBus.publishEvent(SUBSCRIBE_COMMAND_RESULT, data);
+    console.log(`Publishing from message service ${SUBSCRIBE_COMMAND_RESULT_COMPONENT}`, data);
+    EventBus.publishEvent(SUBSCRIBE_COMMAND_RESULT_COMPONENT, data);
   }
 
   private handleUnsubscribeCommandResult(data: any) {

@@ -8,6 +8,15 @@ import { close, connect, onClose, onMessage, send } from "./Websocket";
 export class WebSocketController {
   private socket: WebSocket | null = null;
   private isRetrying: boolean = false;
+  private static instance: WebSocketController | null = null;
+
+  public static getInstance(eventBus: EventBus): WebSocketController {
+    if (!WebSocketController.instance) {
+      console.log("WebSocketController: Creating singleton instance...");
+      WebSocketController.instance = new WebSocketController(eventBus);
+    }
+    return WebSocketController.instance;
+  }
   public getConnectionState(): string {
     if (!this.socket) {
       return "CLOSED";

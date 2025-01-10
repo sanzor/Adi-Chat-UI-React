@@ -27,8 +27,8 @@ export const WebSocketProvider: React.FC<{
   user:User|null;
 }> = ({ children, onConnectSuccessful, onConnectFailed,user }) => {
   const eventBus = useEventBus();
-  const controllerRef = useRef<WebSocketController>();
-  const consumerRef = useRef<WebSocketConsumer>();
+  const controllerRef = useRef<WebSocketController | null>(null);
+  const consumerRef = useRef<WebSocketConsumer | null>(null);
 
   // Track connection state
   const [state, setState] = useState<WebSocketState>({
@@ -39,13 +39,8 @@ export const WebSocketProvider: React.FC<{
 
   // Initialize WebSocketController
   if (!controllerRef.current) {
-    console.log("Initializing WebSocketController...");
-    controllerRef.current = new WebSocketController(eventBus);
-  } else {
-    console.log("Using existing WebSocketController instance...");
+    controllerRef.current = WebSocketController.getInstance(eventBus);
   }
-
-  const websocketController = controllerRef.current;
 
   // Initialize WebSocketConsumer
   if (!consumerRef.current) {
@@ -59,9 +54,12 @@ export const WebSocketProvider: React.FC<{
     }
     console.log("WebSocketProvider: Connecting WebSocket...");
     setState({ isConnecting: true, isConnected: false, hasFailed: false });
-    const url = `${config.baseWsUrl}/ws/id/${user.id}`
     try {
-      websocketController.connect(url);
+      const controller = controllerRef.current;
+      if (controller) {
+        console.log('WebSocketProvider: Connecting WebSocket...');
+        controller.connect(`${config.baseWsUrl}/ws/id/${user.id}`);
+      }
   
       const handleConnected = () => {
         console.log("WebSocketProvider: Connection successful.");
@@ -90,7 +88,10 @@ export const WebSocketProvider: React.FC<{
   
       return () => {
         console.log("WebSocketProvider: Cleaning up...");
-        websocketController.disconnect();
+        if (controller) {
+          console.log('WebSocketProvider: Disconnecting WebSocket...');
+          controller.disconnect();
+        }
         eventBus.unsubscribe("WEBSOCKET_CONNECTED", handleConnected);
         eventBus.unsubscribe("WEBSOCKET_CONNECTION_FAILED", handleConnectionFailed);
         eventBus.unsubscribe("WEBSOCKET_DISCONNECTED", handleDisconnected);
@@ -102,10 +103,12 @@ export const WebSocketProvider: React.FC<{
         onConnectFailed();
       }
     }
-  }, [websocketController, onConnectSuccessful, onConnectFailed, eventBus]);
-
+  }, [user,onConnectSuccessful, onConnectFailed, eventBus]);
+  if (!controllerRef.current) {
+    throw new Error("WebSocketController is not initialized.");
+  }
   return (
-    <WebSocketContext.Provider value={{ controller: websocketController, state }}>
+    <WebSocketContext.Provider value={{ controller: controllerRef.current!, state }}>
       {children}
     </WebSocketContext.Provider>
   );

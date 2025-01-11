@@ -17,23 +17,6 @@ export class WebSocketController {
     }
     return WebSocketController.instance;
   }
-  public getConnectionState(): string {
-    if (!this.socket) {
-      return "CLOSED";
-    }
-    switch (this.socket.readyState) {
-      case WebSocket.CONNECTING:
-        return "CONNECTING";
-      case WebSocket.OPEN:
-        return "OPEN";
-      case WebSocket.CLOSING:
-        return "CLOSING";
-      case WebSocket.CLOSED:
-        return "CLOSED";
-      default:
-        return "UNKNOWN";
-    }
-  }
 
   constructor(private eventBus: EventBus) {
     this.eventBus.subscribe(SOCKET_COMMAND, this.handleSocketCommand);

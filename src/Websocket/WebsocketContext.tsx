@@ -52,7 +52,6 @@ export const WebSocketProvider: React.FC<{
       console.log("WebSocketProvider: User is not set. Skipping connection.");
       return;
     }
-    console.log("WebSocketProvider: Connecting WebSocket...");
     setState({ isConnecting: true, isConnected: false, hasFailed: false });
     try {
       const controller = controllerRef.current;

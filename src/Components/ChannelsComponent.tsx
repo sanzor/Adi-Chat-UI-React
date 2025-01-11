@@ -1,8 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { SUBSCRIBE_COMMAND_RESULT_U,
-         SET_CHAT,
-         ADD_CHANNEL
-} from "../Events";
+         SET_CHAT} from "../Events";
 import { Channel } from "../Domain/Channel";
 import ChannelComponent from "./ChannelComponent";
 import { useEventBus } from "./EventBusContext";
@@ -16,26 +14,17 @@ export interface ChannelsComponentProps{
 const ChannelsComponent:React.FC<ChannelsComponentProps>=({
     channels,
     setCurrentChannel,
-    setChannels,
     handleUnsubscribe})=>{
-   const EventBus=useEventBus()
-    useEffect(()=>{
+   const EventBus = useEventBus();
+   const channelsRef = useRef<Channel[]>(channels);
+   useEffect(() => {
+        channelsRef.current = channels;
+      }, [channels]);
+        useEffect(()=>{
         EventBus.subscribe(SUBSCRIBE_COMMAND_RESULT_U,()=>{});//onSubscribeResultU);
     },[]);
 
-
-    useEffect(()=>{
-        const handleAddChannel=(channel:Channel)=>{
-            if(!channels.find((c)=>c.id===channel.id)){
-                const newChannelList=[...channels,channel];
-                setChannels(newChannelList);
-            }
-        };
-        EventBus.subscribe(ADD_CHANNEL,handleAddChannel);
-        return ()=>{
-            EventBus.unsubscribe(ADD_CHANNEL,handleAddChannel);
-        };
-    },[channels,setChannels]);
+// Only depend on EventBus and setChannels
 
     const handleOpenChat = (channel: Channel) => {
         setCurrentChannel(channel);

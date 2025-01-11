@@ -29,6 +29,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
         const storedCurrentChannel = localStorage.getItem('currentChannel');
         return storedCurrentChannel ? JSON.parse(storedCurrentChannel) : null;
       });
+
     const [subscribe,setSubscribe]=useState('');
     const [firstChatSet,setFirstChat]=useState(false);
  // Dependencies to ensure the effect re-runs if `userdata` changes // Only re-run when `userdata` changes
@@ -40,7 +41,20 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
         setItemInStorage(CURRENT_CHANNEL,currentChannel);
     },[currentChannel]);
 
-
+    useEffect(() => {
+        const handleAddChannel = (channel: Channel) => {
+          // Use the latest channelsRef value to check for duplicates
+          if (!channels.find((c) => c.id === channel.id)) {
+            const newChannelList = [...channels, channel];
+            setChannels(newChannelList);
+          }
+        };
+        eventBus.subscribe(ADD_CHANNEL, handleAddChannel);
+        return () => {
+          eventBus.unsubscribe(ADD_CHANNEL, handleAddChannel);
+        };
+      }, [eventBus, channels]); 
+      
     const handleLogout=()=>{
         console.log("closing socket...");
         eventBus.publishEvent(SOCKET_CLOSED,{});
@@ -49,6 +63,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
     };
 
     const handleSubscribe=async()=>{
+      try {
         console.log("inside subscribe");
         async function onOwnSubscribeResult(ev:CustomEvent,resolve:(value: SubscribeCommandResultDto | PromiseLike<SubscribeCommandResultDto>) => void,_:(reason?: any) => void){
             console.log(`On subscribe result: ${ev.detail}`);
@@ -62,6 +77,10 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
             eventBus.publishCommand({kind:SUBSCRIBE_COMMAND,topic: subscribe}as SubscribeCommand);
         });
         var _=await handleSubscribeResultAsync(subscribeResult);
+      } catch (error) {
+        console.error("Subscription failed:", error);
+      }
+       
     };
     const handleSubscribeResultAsync = (subscribeResult: SubscribeCommandResultDto): void | Error => {
         console.log(`Subscription result: ${subscribeResult.result}`);
@@ -107,7 +126,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
       };
     const handleUnsubscribe = async (event: CustomEvent): Promise<void> => {
         const channel = event.detail;
-      
+        setChannels((prevChannels) => prevChannels.filter((c) => c.id !== channel.id));
         try {
           const unsubscribeResult = await new Promise<UnsubscribeCommandResultDto>((resolve, reject) => {
             // Subscribe to the UNSUBSCRIBE_COMMAND_RESULT event

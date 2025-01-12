@@ -20,10 +20,15 @@ export function connect(url: string): WebSocket {
  * Sends data through the WebSocket.
  */
 export function send(data: string) {
-  if (socket && socket.readyState === WebSocket.OPEN) {
+  if (!socket || socket.readyState !== WebSocket.OPEN) {
+    console.error("WebSocketController: Cannot send command, WebSocket is not connected.");
+    return;
+  }
+  try {
+    console.log("WebSocketController: Sending data:", data);
     socket.send(data);
-  } else {
-    console.error("WebSocket is not open. Unable to send message:", data);
+  } catch (error) {
+    console.error("WebSocketController: Failed to send data:", error);
   }
 }
 

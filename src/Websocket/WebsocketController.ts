@@ -2,14 +2,15 @@ import { createSocketCommand } from "../Adapters/CommandAdapter";
 import { EventBus } from "../Components/EventBus";
 import { SOCKET_COMMAND } from "../Constants";
 import { Command } from "../Domain/Commands/Command";
-import { SOCKET_CLOSED, SOCKET_RECEIVE } from "../Events";
+import { SOCKET_CLOSED } from "../Events";
+import MessageService from "./MessageService";
 import { close, connect, onClose, onMessage, send } from "./Websocket";
 
 export class WebSocketController {
   private socket: WebSocket | null = null;
   private isRetrying: boolean = false;
   private static instance: WebSocketController | null = null;
-
+  private messageQueue: string[] = [];
   public static getInstance(eventBus: EventBus): WebSocketController {
     if (!WebSocketController.instance) {
       console.log("WebSocketController: Creating singleton instance...");
@@ -45,7 +46,14 @@ export class WebSocketController {
 
       this.socket.onopen = () => {
         console.log("WebSocketController: Connection opened.");
+        this.retryCount = 0; // Reset retry count
         this.isRetrying = false;
+        while (this.messageQueue.length > 0) {
+          const message = this.messageQueue.shift();
+          if (message) {
+            this.sendMessage(message);
+          }
+        }
         this.eventBus.publishEvent("WEBSOCKET_CONNECTED", {});
       };
 
@@ -80,10 +88,17 @@ export class WebSocketController {
     this.eventBus.publishEvent("WEBSOCKET_DISCONNECTED", {});
   }
 
+  private retryCount = 0;
+
   private retryConnection(url: string): void {
     this.isRetrying = true;
-    console.log("WebSocketController: Retrying connection in 3 seconds...");
-    setTimeout(() => this.connect(url), 3000); // Retry after 3 seconds
+    const retryDelay = Math.min(1000 * Math.pow(2, this.retryCount), 30000); // Exponential backoff, max 30s
+    console.log(`WebSocketController: Retrying connection in ${retryDelay / 1000} seconds...`);
+  
+    setTimeout(() => {
+      this.retryCount++;
+      this.connect(url);
+    }, retryDelay);
   }
 
   private handleMessage = (message: MessageEvent): void => {
@@ -91,7 +106,7 @@ export class WebSocketController {
 
     try {
       const parsedData = JSON.parse(message.data);
-      this.eventBus.publishEvent(SOCKET_RECEIVE, parsedData);
+      MessageService.handleMessage(parsedData);
     } catch (error) {
       console.error("WebSocketController: Failed to parse message:", error);
     }
@@ -104,18 +119,24 @@ export class WebSocketController {
   };
 
   private handleSocketCommand = (event: CustomEvent): void => {
+    const command: Command = event.detail;
+    const payload = JSON.stringify(createSocketCommand(command));
+
     if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
-      console.log(this.socket?.readyState);
-      console.error("WebSocketController: Cannot send command, WebSocket is not connected.");
-     
+      console.warn("WebSocketController: WebSocket is not connected. Queuing message:", payload);
+      this.messageQueue.push(payload); // Queue the message
       return;
     }
 
-    const command: Command = event.detail;
-    const payload = JSON.stringify(createSocketCommand(command));
-    send(payload);
+    this.sendMessage(payload);
   };
-
+  private sendMessage(payload: string): void {
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      send(payload);
+    } else {
+      console.error("WebSocketController: Cannot send message, WebSocket is not open:", payload);
+    }
+  }
   private handleSocketClosed = (): void => {
     console.log("WebSocketController: Closing connection via EventBus.");
     this.disconnect();

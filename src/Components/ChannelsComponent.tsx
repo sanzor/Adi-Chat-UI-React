@@ -17,6 +17,7 @@ const ChannelsComponent:React.FC<ChannelsComponentProps>=({
     handleUnsubscribe})=>{
    const EventBus = useEventBus();
    const channelsRef = useRef<Channel[]>(channels);
+   
    useEffect(() => {
         channelsRef.current = channels;
       }, [channels]);

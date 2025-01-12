@@ -2,7 +2,6 @@ import React, { createContext, useContext, useEffect, useRef, useState } from "r
 import { useEventBus } from "../Components/EventBusContext";
 import config from "../Config";
 import { WebSocketController } from "./WebsocketController";
-import { WebSocketConsumer } from "./WebsocketConsumer";
 import { User } from "../Domain/User";
 
 // Define the shape of the WebSocket state
@@ -28,7 +27,6 @@ export const WebSocketProvider: React.FC<{
 }> = ({ children, onConnectSuccessful, onConnectFailed,user }) => {
   const eventBus = useEventBus();
   const controllerRef = useRef<WebSocketController | null>(null);
-  const consumerRef = useRef<WebSocketConsumer | null>(null);
 
   // Track connection state
   const [state, setState] = useState<WebSocketState>({
@@ -42,10 +40,6 @@ export const WebSocketProvider: React.FC<{
     controllerRef.current = WebSocketController.getInstance(eventBus);
   }
 
-  // Initialize WebSocketConsumer
-  if (!consumerRef.current) {
-    consumerRef.current = new WebSocketConsumer(eventBus);
-  }
 
   useEffect(() => {
     if (!user) {

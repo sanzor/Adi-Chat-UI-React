@@ -1,5 +1,6 @@
 // MessageService.ts
-import EventBus from "../Components/EventBus";
+
+import { EventBus } from "../Components/EventBus";
 import { 
   CHAT,
   COMMAND_RESULT,
@@ -19,7 +20,13 @@ import {
     SUBSCRIBE_COMMAND_RESULT_COMPONENT
 } from "../Events";
 
-class MessageService {
+export class MessageService {
+
+  private eventBus: EventBus;
+
+  constructor(eventBus: EventBus) {
+    this.eventBus = eventBus;
+  }
   public handleMessage(data: any) {
     switch (data.kind) {
       case CHAT:
@@ -41,7 +48,7 @@ class MessageService {
 
   private handleChatMessage(data: any) {
     console.log("New chat message received:", data);
-    EventBus.publishEvent(NEW_INCOMING_MESSAGE, data.detail);
+    this.eventBus.publishEvent(NEW_INCOMING_MESSAGE, data.detail);
   }
 
   private handleCommandResult(data: any) {
@@ -55,7 +62,7 @@ class MessageService {
         break;
 
       case REFRESH_CHANNELS_COMMAND:
-        EventBus.publishEvent("REFRESH_CHANNELS_COMMAND_RESULT", data.result);
+        this.eventBus.publishEvent("REFRESH_CHANNELS_COMMAND_RESULT", data.result);
         break;
 
       case GET_NEWEST_MESSAGES_COMMAND:
@@ -73,35 +80,32 @@ class MessageService {
 
   private handleUserEvent(data: any) {
     if (data.user_event_kind === SUBSCRIBE_COMMAND) {
-      EventBus.publishEvent(SUBSCRIBE_COMMAND_RESULT, data);
+      this.eventBus.publishEvent(SUBSCRIBE_COMMAND_RESULT, data);
     } else if (data.user_event_kind === UNSUBSCRIBE_COMMAND) {
-      EventBus.publishEvent(UNSUBSCRIBE_COMMAND_RESULT_U, data);
+      this.eventBus.publishEvent(UNSUBSCRIBE_COMMAND_RESULT_U, data);
     }
   }
 
   private handleSubscribeCommandResult(data: any) {
     console.log(`Publishing from message service ${SUBSCRIBE_COMMAND_RESULT_COMPONENT}`, data);
-    EventBus.publishEvent(SUBSCRIBE_COMMAND_RESULT_COMPONENT, data);
+    this.eventBus.publishEvent(SUBSCRIBE_COMMAND_RESULT_COMPONENT, data);
   }
 
   private handleUnsubscribeCommandResult(data: any) {
     console.log("Unsubscribe command result:", data);
     if (data.result === "ok") {
-      EventBus.publishEvent(UNSUBSCRIBE_COMMAND_RESULT, data);
-      EventBus.publishEvent(RESET_CHAT, {});
+      this.eventBus.publishEvent(UNSUBSCRIBE_COMMAND_RESULT, data);
+      this.eventBus.publishEvent(RESET_CHAT, {});
     }
   }
 
   private handleGetNewestMessagesCommandResult(data: any) {
     console.log("Newest messages received:", data.messages);
-    EventBus.publishEvent("getNewestMessages", data.messages);
+    this.eventBus.publishEvent("getNewestMessages", data.messages);
   }
 
   private handleGetOlderMessagesCommandResult(data: any) {
     console.log("Older messages received:", data.result);
-    EventBus.publishEvent("getOlderMessages", data.result);
+    this.eventBus.publishEvent("getOlderMessages", data.result);
   }
 }
-
-const messageService = new MessageService();
-export default messageService;

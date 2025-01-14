@@ -66,19 +66,16 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
     const handleSubscribe=async()=>{
       try {
         console.log("inside subscribe");
-        let onOwnSubscribeResult: (ev: CustomEvent) => void;
         const subscribeResult = await new Promise<SubscribeCommandResultDto>((resolve, reject) => {
           // Define the callback
-          onOwnSubscribeResult = (ev: CustomEvent) => {
+          const onOwnSubscribeResult = (ev: CustomEvent) => {
             console.log(`On own subscribe result: ${JSON.stringify(ev.detail)}`);
             eventBus.unsubscribe(SUBSCRIBE_COMMAND_RESULT_COMPONENT, onOwnSubscribeResult); // Unsubscribe using the same reference
             resolve(ev.detail as SubscribeCommandResultDto);
           };
-          console.log("Subscribing with handler:", onOwnSubscribeResult);
-          console.log("EventBus instance in handleSubscribe:", eventBus);
           // Subscribe to the event
+          console.log("Subscribing to SUBSCRIBE_COMMAND_RESULT_COMPONENT...");
           eventBus.subscribe(SUBSCRIBE_COMMAND_RESULT_COMPONENT, onOwnSubscribeResult);
-          console.log("Subscribing with handler:", onOwnSubscribeResult);
           // Publish the command
           eventBus.publishCommand({
             kind: SUBSCRIBE_COMMAND,

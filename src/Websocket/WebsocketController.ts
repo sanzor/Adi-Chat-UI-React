@@ -3,7 +3,7 @@ import { EventBus } from "../Components/EventBus";
 import { SOCKET_COMMAND } from "../Constants";
 import { Command } from "../Domain/Commands/Command";
 import { SOCKET_CLOSED } from "../Events";
-import MessageService from "./MessageService";
+import { MessageService } from "./MessageService";
 import { close, connect, onClose, onMessage, send } from "./Websocket";
 
 export class WebSocketController {
@@ -11,18 +11,23 @@ export class WebSocketController {
   private isRetrying: boolean = false;
   private static instance: WebSocketController | null = null;
   private messageQueue: string[] = [];
-  public static getInstance(eventBus: EventBus): WebSocketController {
+
+  public static getInstance(eventBus: EventBus,messageService:MessageService): WebSocketController {
     if (!WebSocketController.instance) {
       console.log("WebSocketController: Creating singleton instance...");
-      WebSocketController.instance = new WebSocketController(eventBus);
+      WebSocketController.instance = new WebSocketController(eventBus,messageService);
     }
     return WebSocketController.instance;
   }
 
-  constructor(private eventBus: EventBus) {
+  constructor(private eventBus: EventBus,private messageService:MessageService) {
+    
     this.eventBus.subscribe(SOCKET_COMMAND, this.handleSocketCommand);
     this.eventBus.subscribe(SOCKET_CLOSED, this.handleSocketClosed);
   }
+
+
+
 
   public connect(url: string): void {
     if (this.socket) {
@@ -106,7 +111,7 @@ export class WebSocketController {
 
     try {
       const parsedData = JSON.parse(message.data);
-      MessageService.handleMessage(parsedData);
+      this.messageService.handleMessage(parsedData);
     } catch (error) {
       console.error("WebSocketController: Failed to parse message:", error);
     }

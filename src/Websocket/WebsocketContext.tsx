@@ -3,6 +3,7 @@ import { useEventBus } from "../Components/EventBusContext";
 import config from "../Config";
 import { WebSocketController } from "./WebsocketController";
 import { User } from "../Domain/User";
+import { MessageService } from "./MessageService";
 
 // Define the shape of the WebSocket state
 interface WebSocketState {
@@ -26,6 +27,7 @@ export const WebSocketProvider: React.FC<{
   user:User|null;
 }> = ({ children, onConnectSuccessful, onConnectFailed,user }) => {
   const eventBus = useEventBus();
+  const messageService = new MessageService(eventBus);
   const controllerRef = useRef<WebSocketController | null>(null);
 
   // Track connection state
@@ -37,7 +39,7 @@ export const WebSocketProvider: React.FC<{
 
   // Initialize WebSocketController
   if (!controllerRef.current) {
-    controllerRef.current = WebSocketController.getInstance(eventBus);
+    controllerRef.current = WebSocketController.getInstance(eventBus,messageService);
   }
 
 

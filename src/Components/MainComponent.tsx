@@ -9,11 +9,12 @@ import { ADD_CHANNEL, REFRESH_CHANNELS_COMMAND_RESULT, REMOVE_CHANNEL, RESET_CHA
 import { useEventBus } from "./EventBusContext";
 import { CHANNELS, CURRENT_CHANNEL, KIND, TOPIC_ID } from "../Constants";
 import { SubscribeCommand } from "../Domain/Commands/SubscribeCommand";
-import { getItemFromStorage, setItemInStorage } from "../Utils";
+import { getDataAsync, getItemFromStorage, setItemInStorage } from "../Utils";
 import { Channel } from "../Domain/Channel";
 import { UnsubscribeCommandResultDto } from "../Dtos/SocketCommandResults/UnsubscrirbeCommandResultDto";
 import { UnsubscribeCommand } from "../Domain/Commands/UnsubscribeCommand";
 import { User } from "../Domain/User";
+import config from "../Config";
 export interface MainComponentProps{
     onLogout:()=>void;
     userdata:User|null;
@@ -29,10 +30,12 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
     const [firstChatSet,setFirstChat]=useState(false);
 
     const [currentChannel, setCurrentChannel] = useState<Channel | null>(() => {
-        const storedCurrentChannel = localStorage.getItem('currentChannel');
+        const storedCurrentChannel = localStorage.getItem(CURRENT_CHANNEL);
         return storedCurrentChannel ? JSON.parse(storedCurrentChannel) : null;
       });
-
+    useEffect(()=>{
+        var channels=await getChannels();
+    })
  // Dependencies to ensure the effect re-runs if `userdata` changes // Only re-run when `userdata` changes
     useEffect(()=>{
         setItemInStorage(CHANNELS,channels);
@@ -43,7 +46,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
     },[currentChannel]);
 
     useEffect(() => {
-        const handleAddChannel = (channel: Channel) => {
+        const handleAddChannel = (channel: Channel)c => {
           // Use the latest channelsRef value to check for duplicates
           if (!channels.find((c) => c.id === channel.id)) {
             const newChannelList = [...channels, channel];
@@ -62,7 +65,12 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
         localStorage.removeItem("user");
         props.onLogout();
     };
-
+    const getChannels=async():Promise<Channel[]>=>{
+      
+       var channels=await getDataAsync(`${config.baseHttpUrl}/get_subscriptions/user/${props.userdata?.id}`);
+       console.log(channels);
+       return channels;
+    };
     const handleSubscribe=async()=>{
       try {
         console.log("inside subscribe");

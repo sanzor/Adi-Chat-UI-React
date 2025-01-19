@@ -34,8 +34,19 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
         return storedCurrentChannel ? JSON.parse(storedCurrentChannel) : null;
       });
     useEffect(()=>{
-        var channels=await getChannels();
-    })
+        fetchChannels();
+    },[]);
+
+    const fetchChannels=async()=>{
+      try {
+        var fetchedChannels=await getChannels();
+        console.log("Stored Channels:", fetchedChannels);
+        setItemInStorage(CHANNELS,fetchedChannels);
+        setChannels(Array.isArray(fetchedChannels) ? fetchedChannels : []);
+      } catch (error) {
+        console.error("Error fetching channels:", error);
+      }
+    };
  // Dependencies to ensure the effect re-runs if `userdata` changes // Only re-run when `userdata` changes
     useEffect(()=>{
         setItemInStorage(CHANNELS,channels);
@@ -46,7 +57,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
     },[currentChannel]);
 
     useEffect(() => {
-        const handleAddChannel = (channel: Channel)c => {
+        const handleAddChannel = (channel: Channel) => {
           // Use the latest channelsRef value to check for duplicates
           if (!channels.find((c) => c.id === channel.id)) {
             const newChannelList = [...channels, channel];
@@ -66,8 +77,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
         props.onLogout();
     };
     const getChannels=async():Promise<Channel[]>=>{
-      
-       var channels=await getDataAsync(`${config.baseHttpUrl}/get_subscriptions/user/${props.userdata?.id}`);
+       var channels=await getDataAsync(`${config.baseHttpUrl}/get_subscriptions/${props.userdata?.id}`);
        console.log(channels);
        return channels;
     };

@@ -42,7 +42,7 @@ const ChannelsComponent:React.FC<ChannelsComponentProps>=({
                   <label id="channelsLabel">Channels</label>
                   <div id="channelsAreaPanel">
                           <div id="channelsContainer" className="chatScroll">
-                            {channels.map((channel)=>(
+                            {Array.isArray(channels) && channels.map((channel)=>(
                                 <ChannelComponent
                                     key={channel.id} 
                                     channel={channel} 

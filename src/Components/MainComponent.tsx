@@ -217,8 +217,8 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
 
     return (
     <>
-    <div id="parentPanel" className="parent">
-    <div id="mainPanel">
+    {/* <div id="parentPanel" className="parent"> */}
+    <div id="mainPanel" className="mainPanel">
         <button id="logoutBtn" onClick={handleLogout}>Logout</button>
         <div id="connectButtonsPanel" >            
             <button id="connectBtn" type="button">Connect</button>
@@ -231,16 +231,16 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
             <label id="subscribeLabel" className="subscribeLabel" >Channel</label>
             <button id="subscribeBtn" className="subscribeButton" onClick={handleSubscribe}>Subscribe</button>
         </div> 
-        <ChannelsComponent 
+        <ChannelsComponent
             channels={channels}  
             setChannels={setChannels} 
             setCurrentChannel={setCurrentChannel}
             currentChannel={currentChannel}
             handleUnsubscribe={()=>handleUnsubscribe}/>
-        <ChatComponent></ChatComponent>
+        <ChatComponent ></ChatComponent>
         <ChatSendComponent></ChatSendComponent>
     </div>
-    </div>
+    {/* </div> */}
     </>
     );
 };

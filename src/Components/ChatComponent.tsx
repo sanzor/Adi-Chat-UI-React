@@ -1,3 +1,4 @@
+import "../css/chat.css"
 export interface ChatComponentProps{
 
 }

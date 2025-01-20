@@ -4,6 +4,7 @@ import { SUBSCRIBE_COMMAND_RESULT_U,
 import { Channel } from "../Domain/Channel";
 import ChannelComponent from "./ChannelComponent";
 import { useEventBus } from "./EventBusContext";
+import '../css/channels.css';
 export interface ChannelsComponentProps{
     channels:Channel[],
     setChannels:React.Dispatch<React.SetStateAction<Channel[]>>,
@@ -38,7 +39,7 @@ const ChannelsComponent:React.FC<ChannelsComponentProps>=({
     };
     return(
     <>
-       <div id="channelsPanel" className="channelsPanel">
+       <div id="channelsPanel">
                   <label id="channelsLabel">Channels</label>
                   <div id="channelsAreaPanel">
                           <div id="channelsContainer" className="chatScroll">

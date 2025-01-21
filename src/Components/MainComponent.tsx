@@ -133,6 +133,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
         // Add the channel to the state if it's new
         if (!channels.find((channel) => channel.id === targetChannel.id)) {
           const updatedChannels = [...channels, targetChannel];
+          console.log(updatedChannels);
           setChannels(updatedChannels);
           eventBus.publishEvent(ADD_CHANNEL, targetChannel);
       

@@ -15,11 +15,13 @@ import { UnsubscribeCommandResultDto } from "../Dtos/SocketCommandResults/Unsubs
 import { UnsubscribeCommand } from "../Domain/Commands/UnsubscribeCommand";
 import { User } from "../Domain/User";
 import config from "../Config";
+import { GetUserSubscriptionsResult } from "../Dtos/GetUserSubscriptionsResult";
 export interface MainComponentProps{
     onLogout:()=>void;
     userdata:User|null;
 }
 const MainComponent:React.FC<MainComponentProps> =(props)=>{
+   
     const eventBus=useEventBus();
     const [channels,setChannels]=useState<Channel[]>(()=>{
         const storedChannels=getItemFromStorage<Channel[]>(CHANNELS);
@@ -39,10 +41,14 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
 
     const fetchChannels=async()=>{
       try {
-        var fetchedChannels=await getChannels();
-        console.log("Stored Channels:", fetchedChannels);
-        setItemInStorage(CHANNELS,fetchedChannels);
-        setChannels(Array.isArray(fetchedChannels) ? fetchedChannels : []);
+        var fetchedChannelsResult:GetUserSubscriptionsResult=await getChannels();
+        console.log("Stored Channels:", fetchedChannelsResult.subscriptions);
+        setItemInStorage(CHANNELS,fetchedChannelsResult.subscriptions);
+        setChannels(prevChannels => {
+          console.log("Previous Channels:", prevChannels);
+          console.log("New Channels:", fetchedChannelsResult.subscriptions);
+          return [...fetchedChannelsResult.subscriptions];
+      });
       } catch (error) {
         console.error("Error fetching channels:", error);
       }
@@ -50,6 +56,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
  // Dependencies to ensure the effect re-runs if `userdata` changes // Only re-run when `userdata` changes
     useEffect(()=>{
         setItemInStorage(CHANNELS,channels);
+        console.log(channels);
     },[channels]);
 
     useEffect(()=>{
@@ -76,7 +83,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
         localStorage.removeItem("user");
         props.onLogout();
     };
-    const getChannels=async():Promise<Channel[]>=>{
+    const getChannels=async():Promise<GetUserSubscriptionsResult>=>{
        var channels=await getDataAsync(`${config.baseHttpUrl}/get_subscriptions/${props.userdata?.id}`);
        console.log(channels);
        return channels;

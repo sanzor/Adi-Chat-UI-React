@@ -1,6 +1,6 @@
 import React ,{} from 'react';
 import { Channel } from "../Domain/Channel";
-
+import '../css/channels.css'
 interface ChannelComponentProps{
     channel:Channel;
     onUnsubscribe:(channel:Channel)=>void;

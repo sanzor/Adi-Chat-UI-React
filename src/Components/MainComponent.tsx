@@ -158,8 +158,10 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
           eventBus.publishEvent(SET_CHAT, targetChannel);
         }
       };
-    const handleUnsubscribe = async (event: CustomEvent): Promise<void> => {
-        const channel = event.detail;
+    const handleUnsubscribe = async (channel: Channel): Promise<void> => {
+       
+        console.log("Triggering unsubscribe");
+        console.log(channel);
         setChannels((prevChannels) => prevChannels.filter((c) => c.id !== channel.id));
         try {
           const unsubscribeResult = await new Promise<UnsubscribeCommandResultDto>((resolve, reject) => {
@@ -170,12 +172,12 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
             };
       
             eventBus.subscribe(UNSUBSCRIBE_COMMAND_RESULT, onUnsubscribeResult);
-      
+            let command={
+              kind: UNSUBSCRIBE_COMMAND,
+              topicId: Number(channel.id),
+            } as UnsubscribeCommand
             // Publish the UNSUBSCRIBE command
-            eventBus.publishCommand({
-              [KIND]: UNSUBSCRIBE_COMMAND,
-              topicId: channel.id,
-            } as UnsubscribeCommand);
+            eventBus.publishCommand(command);
           });
       
           // Handle the unsubscribe result
@@ -244,7 +246,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
             setChannels={setChannels} 
             setCurrentChannel={setCurrentChannel}
             currentChannel={currentChannel}
-            handleUnsubscribe={()=>handleUnsubscribe}/>
+            handleUnsubscribe={handleUnsubscribe}/>
         <ChatComponent ></ChatComponent>
         <ChatSendComponent></ChatSendComponent>
     </div>

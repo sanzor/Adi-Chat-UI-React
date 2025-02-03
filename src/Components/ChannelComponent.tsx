@@ -17,8 +17,8 @@ const ChannelComponent:React.FC<ChannelComponentProps>=({channel,onUnsubscribe,o
     <>
     <span className="channelRow" data-channel={JSON.stringify(channel)}>
         <p className="newMessagesBox">0</p>
-        <button  onClick={handleUnsubscribe}></button>
-        <button  onClick={handleOpenChat}></button>
+        <button  onClick={handleUnsubscribe}>X</button>
+        <button  onClick={handleOpenChat}>{channel.name}</button>
     </span>
     </>);
 };

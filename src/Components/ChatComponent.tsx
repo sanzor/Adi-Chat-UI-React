@@ -1,13 +1,18 @@
+import { useState } from "react";
 import "../css/chat.css"
+import { Channel } from "../Domain/Channel";
+import { currentChannel } from "../Elements";
+import { ChatMessage } from "../Domain/ChatMessage";
 export interface ChatComponentProps{
-
+    currentChannel:Channel|null;
 }
 const ChatComponent:React.FC<ChatComponentProps>=(props)=>{
+    [messages,setMessages]=useState<[ChatMessage]>();
     return(
     <>
        <div id="chatPanel" className="chatPanel">
                           <div className="currentChannelNamePanel" id="currentChannelNamePanel">
-                              <label id="currentChannelNameLabel" className="currentChannelNameLabel" >Channel 1</label>
+                              <label id="currentChannelNameLabel" className="currentChannelNameLabel" >{props.currentChannel?.name}</label>
                           </div>
                          <div id="messagesContainer" className="chatScroll">
                               <button id="loadOlderMessagesBtn"> Load older messages</button>

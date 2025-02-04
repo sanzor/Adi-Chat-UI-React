@@ -1,6 +1,7 @@
 
 const CHANNEL:string="channel";
 const CURRENT_CHANNEL:string="current_channel";
+const MESSAGES:string="messages"
 const CHANNELS:string="channels";
 const MESSAGE_CONTENT:string="content";
 const TOPIC:string="topic";
@@ -18,7 +19,7 @@ const MESSAGE_TYPES=[
 export{CHAT,USER_EVENT,COMMAND_RESULT,MESSAGE_TYPES};
 
 export {
-    CHANNEL,CHANNELS,TOPIC,KIND,SOCKET_COMMAND,CURRENT_CHANNEL,ID,USER,TOPIC_ID
+    CHANNEL,CHANNELS,MESSAGES,TOPIC,KIND,SOCKET_COMMAND,CURRENT_CHANNEL,ID,USER,TOPIC_ID
 };
 
 

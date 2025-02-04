@@ -5,9 +5,9 @@ import ChatSendComponent from "./ChatSendComponent";
 import '../css/specific.css';
 import '../css/general.css';
 import { SubscribeCommandResultDto } from "../Dtos/SocketCommandResults/SubscribeCommandResultDto";
-import { ADD_CHANNEL, REFRESH_CHANNELS_COMMAND_RESULT, REMOVE_CHANNEL, RESET_CHAT, SET_CHAT, SOCKET_CLOSED, SUBSCRIBE_COMMAND, SUBSCRIBE_COMMAND_RESULT_COMPONENT, UNSUBSCRIBE_COMMAND, UNSUBSCRIBE_COMMAND_RESULT } from "../Events";
+import { ADD_CHANNEL, GET_NEWEST_MESSAGES_COMMAND, NEW_INCOMING_MESSAGE, REFRESH_CHANNELS_COMMAND_RESULT, REMOVE_CHANNEL, RESET_CHAT, SET_CHAT, SOCKET_CLOSED, SUBSCRIBE_COMMAND, SUBSCRIBE_COMMAND_RESULT_COMPONENT, UNSUBSCRIBE_COMMAND, UNSUBSCRIBE_COMMAND_RESULT } from "../Events";
 import { useEventBus } from "./EventBusContext";
-import { CHANNELS, CURRENT_CHANNEL, KIND, TOPIC_ID } from "../Constants";
+import { CHANNELS, CURRENT_CHANNEL, KIND, MESSAGES, TOPIC_ID } from "../Constants";
 import { SubscribeCommand } from "../Domain/Commands/SubscribeCommand";
 import { getDataAsync, getItemFromStorage, setItemInStorage } from "../Utils";
 import { Channel } from "../Domain/Channel";
@@ -16,6 +16,9 @@ import { UnsubscribeCommand } from "../Domain/Commands/UnsubscribeCommand";
 import { User } from "../Domain/User";
 import config from "../Config";
 import { GetUserSubscriptionsResult } from "../Dtos/GetUserSubscriptionsResult";
+import { GetNewestMessagesResult } from "../Dtos/GetNewestMessagesResult";
+import { ChatMessage } from "../Domain/ChatMessage";
+import { GetNewestMessagesCommand } from "../Domain/Commands/GetNewestMessagesCommand";
 export interface MainComponentProps{
     onLogout:()=>void;
     userdata:User|null;
@@ -27,7 +30,10 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
         const storedChannels=getItemFromStorage<Channel[]>(CHANNELS);
         return storedChannels ?storedChannels: [];
     });
-
+    const [messagesByChannel, setMessagesByChannel] = useState<Record<string, ChatMessage[]>>(() => {
+      const storedMessages = getItemFromStorage<Record<string, ChatMessage[]>>("messages");
+      return storedMessages ? storedMessages : {};
+    });
     const [subscribe,setSubscribe]=useState('');
     const [firstChatSet,setFirstChat]=useState(false);
 
@@ -38,7 +44,13 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
     useEffect(()=>{
         fetchChannels();
     },[]);
-
+    useEffect(()=>{
+      if(!currentChannel){
+        return;
+      }
+       let command:GetNewestMessagesCommand={topicId:currentChannel.id,count:10};
+       eventBus.publishCommand()
+    });
     const fetchChannels=async()=>{
       try {
         var fetchedChannelsResult:GetUserSubscriptionsResult=await getChannels();
@@ -76,7 +88,25 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
           eventBus.unsubscribe(ADD_CHANNEL, handleAddChannel);
         };
       }, [eventBus, channels]); 
-      
+
+    useEffect(()=>{
+        const handleNewMessage=(event:CustomEvent)=>{
+          const newMessage:ChatMessage=event.detail;
+          setMessagesByChannel(prev=>{
+             const updatedMessages={
+              ...prev,
+              [newMessage.topicId]:[...(prev[newMessage.topicId]||[])],
+             };
+             setItemInStorage(MESSAGES,updatedMessages);
+             return updatedMessages;
+          });
+        }
+        eventBus.subscribe(NEW_INCOMING_MESSAGE,handleNewMessage);
+        return ()=>{
+            eventBus.unsubscribe(NEW_INCOMING_MESSAGE,handleNewMessage);
+        }
+    },[eventBus]);
+
     const handleLogout=()=>{
         console.log("closing socket...");
         eventBus.publishEvent(SOCKET_CLOSED,{});
@@ -88,6 +118,8 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
        console.log(channels);
        return channels;
     };
+
+
     const handleSubscribe=async()=>{
       try {
         console.log("inside subscribe");
@@ -248,7 +280,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
             setCurrentChannel={setCurrentChannel}
             currentChannel={currentChannel}
             handleUnsubscribe={handleUnsubscribe}/>
-        <ChatComponent currentChannel={currentChannel}></ChatComponent>
+        <ChatComponent currentChannel={currentChannel} messages={messagesByChannel[currentChannel?.id??""]}></ChatComponent>
         <ChatSendComponent></ChatSendComponent>
     </div>
     {/* </div> */}

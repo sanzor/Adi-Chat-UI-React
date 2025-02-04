@@ -1,31 +1,29 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "../css/chat.css"
 import { Channel } from "../Domain/Channel";
 import { currentChannel } from "../Elements";
 import { ChatMessage } from "../Domain/ChatMessage";
+import ChatMessageComponent from "./ChatMessageComponent";
 export interface ChatComponentProps{
     currentChannel:Channel|null;
+    messages:ChatMessage[];
 }
-const ChatComponent:React.FC<ChatComponentProps>=(props)=>{
-    [messages,setMessages]=useState<[ChatMessage]>();
+const ChatComponent:React.FC<ChatComponentProps>=({currentChannel,messages})=>{
+        useEffect(()=>{
+            
+        },[messages]);
     return(
     <>
        <div id="chatPanel" className="chatPanel">
                           <div className="currentChannelNamePanel" id="currentChannelNamePanel">
-                              <label id="currentChannelNameLabel" className="currentChannelNameLabel" >{props.currentChannel?.name}</label>
+                              <label id="currentChannelNameLabel" className="currentChannelNameLabel" >{currentChannel?.name}</label>
                           </div>
                          <div id="messagesContainer" className="chatScroll">
                               <button id="loadOlderMessagesBtn"> Load older messages</button>
-                              <div className="chatMessageContainer">
-                                  <img className="icon chatMessageIcon"/>
-                                  <div className="chatMessageMeta"> 12:32 GMT +2 </div>
-                                  <div className="chatMessageContent">sugi pwla cu dan voiculescu</div>
-                                  <div className="chatMessageStatus">
-                                      <div className="chatMessageStatusPending">tick</div>
-                                      <div className="chatMessageStatusSent">tick</div>
-                                      <div className="chatMessageStatusSeen">tick</div>
-                                  </div>
-                              </div>
+                              {Array.isArray(messages) && messages.map(msg=>(
+                                <ChatMessageComponent chatMessage={msg}>
+
+                              </ChatMessageComponent>))}
                          </div>
         </div>
     </>

@@ -3,6 +3,6 @@ import { BaseCommandResultDto } from "./BaseCommandResultDto";
 
 export interface UnsubscribeCommandResultDto extends BaseCommandResultDto{
     command: typeof UNSUBSCRIBE_COMMAND;
-    topicId:string;
+    topicId:number;
     result:string;
 }

@@ -6,7 +6,9 @@ const UNSUBSCRIBE_COMMAND:string="unsubscribe";
 const PUBLISH_MESSAGE_COMMAND:string="publish";
 const SELF_PUBLISH_MESSAGE_COMMAND:string="self_publish";
 const GET_OLDER_MESSAGES_COMMAND:string="get_older_messages";
+const GET_OLDER_MESSAGES_COMMAND_RESULT:string="get_older_messages_result";
 const GET_NEWEST_MESSAGES_COMMAND:string="get_newest_messages";
+const GET_NEWEST_MESSAGES_COMMAND_RESULT:string="get_newest_messages_result";
 const DISCONNECT_COMMAND:string="disconnect";
 
 
@@ -74,7 +76,9 @@ export {
     PUBLISH_MESSAGE_COMMAND,
     SELF_PUBLISH_MESSAGE_COMMAND,
     GET_OLDER_MESSAGES_COMMAND,
+    GET_OLDER_MESSAGES_COMMAND_RESULT,
     GET_NEWEST_MESSAGES_COMMAND,
+    GET_NEWEST_MESSAGES_COMMAND_RESULT,
 
     SHOW_MAIN,
     HIDE_MAIN,

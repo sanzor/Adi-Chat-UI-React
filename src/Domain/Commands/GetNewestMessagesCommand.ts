@@ -5,5 +5,4 @@ export interface GetNewestMessagesCommand extends Command {
     kind: typeof GET_NEWEST_MESSAGES_COMMAND;
     topicId: number;
     count: number;
-    startIndex:number;
 }

@@ -5,7 +5,7 @@ import ChatSendComponent from "./ChatSendComponent";
 import '../css/specific.css';
 import '../css/general.css';
 import { SubscribeCommandResultDto } from "../Dtos/SocketCommandResults/SubscribeCommandResultDto";
-import { ADD_CHANNEL, GET_NEWEST_MESSAGES_COMMAND, NEW_INCOMING_MESSAGE, REFRESH_CHANNELS_COMMAND_RESULT, REMOVE_CHANNEL, RESET_CHAT, SET_CHAT, SOCKET_CLOSED, SUBSCRIBE_COMMAND, SUBSCRIBE_COMMAND_RESULT_COMPONENT, UNSUBSCRIBE_COMMAND, UNSUBSCRIBE_COMMAND_RESULT } from "../Events";
+import { ADD_CHANNEL, GET_NEWEST_MESSAGES_COMMAND, GET_NEWEST_MESSAGES_COMMAND_RESULT, NEW_INCOMING_MESSAGE, REFRESH_CHANNELS_COMMAND_RESULT, REMOVE_CHANNEL, RESET_CHAT, SET_CHAT, SOCKET_CLOSED, SUBSCRIBE_COMMAND, SUBSCRIBE_COMMAND_RESULT_COMPONENT, UNSUBSCRIBE_COMMAND, UNSUBSCRIBE_COMMAND_RESULT } from "../Events";
 import { useEventBus } from "./EventBusContext";
 import { CHANNELS, CURRENT_CHANNEL, KIND, MESSAGES, TOPIC_ID } from "../Constants";
 import { SubscribeCommand } from "../Domain/Commands/SubscribeCommand";
@@ -43,14 +43,13 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
       });
     useEffect(()=>{
         fetchChannels();
+        channels.map(channel=>{
+          let command:GetNewestMessagesCommand={topicId:channel.id,count:10,kind:GET_NEWEST_MESSAGES_COMMAND};
+          eventBus.publishCommand(command);
+          return channel;
+        });
     },[]);
-    useEffect(()=>{
-      if(!currentChannel){
-        return;
-      }
-       let command:GetNewestMessagesCommand={topicId:currentChannel.id,count:10};
-       eventBus.publishCommand()
-    });
+
     const fetchChannels=async()=>{
       try {
         var fetchedChannelsResult:GetUserSubscriptionsResult=await getChannels();
@@ -89,7 +88,8 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
         };
       }, [eventBus, channels]); 
 
-    useEffect(()=>{
+      //#region messages
+      useEffect(()=>{
         const handleNewMessage=(event:CustomEvent)=>{
           const newMessage:ChatMessage=event.detail;
           setMessagesByChannel(prev=>{
@@ -106,7 +106,25 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
             eventBus.unsubscribe(NEW_INCOMING_MESSAGE,handleNewMessage);
         }
     },[eventBus]);
-
+    const handleGetNewestMessagesForChannel=(event:CustomEvent)=>{
+      const newEstMessages:GetNewestMessagesResult=event.detail;
+      setMessagesByChannel(prev=>{
+         const updatedMessages={
+           ...prev,
+            [newEstMessages.channelId]:newEstMessages.messages??[]
+         };
+         setItemInStorage(MESSAGES,updatedMessages);
+         return updatedMessages;
+      });
+  }
+    useEffect(()=>{
+       eventBus.subscribe(GET_NEWEST_MESSAGES_COMMAND_RESULT,handleGetNewestMessagesForChannel);
+       return ()=>{
+          eventBus.unsubscribe(GET_NEWEST_MESSAGES_COMMAND_RESULT,handleGetNewestMessagesForChannel);
+       }
+    });
+      //#endregion
+   
     const handleLogout=()=>{
         console.log("closing socket...");
         eventBus.publishEvent(SOCKET_CLOSED,{});

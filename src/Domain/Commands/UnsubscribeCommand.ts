@@ -1,7 +1,7 @@
 import { UNSUBSCRIBE_COMMAND } from "../../Events";
-import { Message } from "../Message";
+import { Command } from "./Command";
 
-export interface UnsubscribeCommand extends Message {
+export interface UnsubscribeCommand extends Command {
     kind: typeof UNSUBSCRIBE_COMMAND;
     topicId: number;
 }

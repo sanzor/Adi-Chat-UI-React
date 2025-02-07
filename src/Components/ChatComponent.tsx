@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import "../css/chat.css"
 import { Channel } from "../Domain/Channel";
-import { currentChannel } from "../Elements";
 import { ChatMessage } from "../Domain/ChatMessage";
 import ChatMessageComponent, { ChatMessageStatus } from "./ChatMessageComponent";
 export interface ChatComponentProps{

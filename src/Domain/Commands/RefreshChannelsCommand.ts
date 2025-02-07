@@ -1,6 +1,6 @@
 import { REFRESH_CHANNELS_COMMAND } from "../../Events";
-import { Message } from "../Message";
+import { Command } from "./Command";
 
-export interface GetSubscripttionsCommand extends Message {
+export interface GetSubscripttionsCommand extends Command {
     kind: typeof REFRESH_CHANNELS_COMMAND;
 }

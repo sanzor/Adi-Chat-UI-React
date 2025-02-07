@@ -3,7 +3,7 @@ import { Command } from "../Domain/Commands/Command";
 import { DisconnectCommand } from "../Domain/Commands/DisconnectCommand";
 import { GetNewestMessagesCommand } from "../Domain/Commands/GetNewestMessagesCommand";
 import { GetOlderMessagesCommand } from "../Domain/Commands/GetOlderMessagesCommand";
-import { PublishCommand } from "../Domain/Commands/PublishCommand";
+import { PublishMessageCommand } from "../Domain/Commands/PublishCommand";
 import { GetSubscripttionsCommand } from "../Domain/Commands/RefreshChannelsCommand";
 import { SubscribeCommand } from "../Domain/Commands/SubscribeCommand";
 import { UnsubscribeCommand } from "../Domain/Commands/UnsubscribeCommand";
@@ -43,7 +43,7 @@ function innerCreateCommand(data:Command): BaseCommandDto|null{
             break;
         case PUBLISH_MESSAGE_COMMAND :
             if(isPublishMessage(data))
-                return create_command_publish(data as PublishCommand);
+                return create_command_publish(data as PublishMessageCommand);
             break;
         case DISCONNECT_COMMAND:
             if(isDisconnectCommand(data))
@@ -98,7 +98,7 @@ function command_disconnect():DisconnectCommandDto{
     return message;
 }
 
-function create_command_publish(command:PublishCommand):PublishCommandDto{
+function create_command_publish(command:PublishMessageCommand):PublishCommandDto{
    
     var toSend:PublishCommandDto={
         command:PUBLISH_MESSAGE_COMMAND,
@@ -140,7 +140,7 @@ function isRefreshChannelsCommand(command: Command): command is GetSubscripttion
     return command.kind === REFRESH_CHANNELS_COMMAND;
 }
 
-function isPublishMessage(command: Command): command is PublishCommand {
+function isPublishMessage(command: Command): command is PublishMessageCommand {
     return command.kind === PUBLISH_MESSAGE_COMMAND;
 }
 

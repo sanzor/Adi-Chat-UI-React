@@ -5,7 +5,7 @@ import ChatSendComponent from "./ChatSendComponent";
 import '../css/specific.css';
 import '../css/general.css';
 import { SubscribeCommandResultDto } from "../Dtos/SocketCommandResults/SubscribeCommandResultDto";
-import { ADD_CHANNEL, GET_NEWEST_MESSAGES_COMMAND, GET_NEWEST_MESSAGES_COMMAND_RESULT, NEW_INCOMING_MESSAGE, REFRESH_CHANNELS_COMMAND_RESULT, REMOVE_CHANNEL, RESET_CHAT, SET_CHAT, SOCKET_CLOSED, SUBSCRIBE_COMMAND, SUBSCRIBE_COMMAND_RESULT_COMPONENT, UNSUBSCRIBE_COMMAND, UNSUBSCRIBE_COMMAND_RESULT } from "../Events";
+import { ADD_CHANNEL, GET_NEWEST_MESSAGES_COMMAND, GET_NEWEST_MESSAGES_COMMAND_RESULT, NEW_INCOMING_MESSAGE, PUBLISH_MESSAGE_COMMAND, REFRESH_CHANNELS_COMMAND_RESULT, REMOVE_CHANNEL, RESET_CHAT, SET_CHAT, SOCKET_CLOSED, SUBSCRIBE_COMMAND, SUBSCRIBE_COMMAND_RESULT_COMPONENT, UNSUBSCRIBE_COMMAND, UNSUBSCRIBE_COMMAND_RESULT } from "../Events";
 import { useEventBus } from "./EventBusContext";
 import { CHANNELS, CURRENT_CHANNEL, KIND, MESSAGES, TOPIC_ID } from "../Constants";
 import { SubscribeCommand } from "../Domain/Commands/SubscribeCommand";
@@ -19,6 +19,7 @@ import { GetUserSubscriptionsResult } from "../Dtos/GetUserSubscriptionsResult";
 import { GetNewestMessagesResult } from "../Dtos/GetNewestMessagesResult";
 import { ChatMessage } from "../Domain/ChatMessage";
 import { GetNewestMessagesCommand } from "../Domain/Commands/GetNewestMessagesCommand";
+import { PublishMessageCommand } from "../Domain/Commands/PublishCommand";
 export interface MainComponentProps{
     onLogout:()=>void;
     userdata:User|null;
@@ -276,7 +277,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
         });
       };
     const handleChatSend=(newMessage:ChatMessage)=>{
-      eventBus.publishEvent()
+        eventBus.publishCommand({message:newMessage,kind:PUBLISH_MESSAGE_COMMAND} as PublishMessageCommand)
     }
     return (
     <>
@@ -295,7 +296,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
             currentChannel={currentChannel}
             handleUnsubscribe={handleUnsubscribe}/>
         <ChatComponent currentChannel={currentChannel} messages={messagesByChannel[currentChannel?.id??""]}></ChatComponent>
-        <ChatSendComponent></ChatSendComponent>
+        <ChatSendComponent handleChatSend={handleChatSend}></ChatSendComponent>
     </div>
     {/* </div> */}
     </>

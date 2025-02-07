@@ -275,18 +275,14 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
           return updatedChannels;
         });
       };
-
+    const handleChatSend=(newMessage:ChatMessage)=>{
+      eventBus.publishEvent()
+    }
     return (
     <>
     {/* <div id="parentPanel" className="parent"> */}
     <div id="mainPanel" className="mainPanel">
         <button id="logoutBtn" onClick={handleLogout}>Logout</button>
-        <div id="connectButtonsPanel" >            
-            <button id="connectBtn" type="button">Connect</button>
-            <button id="disconnectBtn" className="disconnectButton" type="button" value="Disconnect">
-                Disconnect
-            </button>
-        </div>
         <div id="subscribeButtonPanel" className="panel">
             <input  id="subscribeBox" type="text" value={subscribe} onChange={(e)=>setSubscribe(e.target.value)}/>
             <label id="subscribeLabel" className="subscribeLabel" >Channel</label>

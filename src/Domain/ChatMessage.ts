@@ -5,4 +5,5 @@ export interface ChatMessage extends Message{
     userId:number;
     topicId:number;
     message:string;
+    created_at:string;
 }

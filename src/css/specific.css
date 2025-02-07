@@ -48,8 +48,10 @@
 }
 
 #mainPanel{
-    width: 95%;
-    height:85%;
+    width: 1000px;
+    height:600px;
+    overflow-y: auto;
+    overflow-x: auto;
     display: grid;
     gap: 1rem;
     grid-template-rows: 10% 4fr  3fr 2fr 1fr 1fr;

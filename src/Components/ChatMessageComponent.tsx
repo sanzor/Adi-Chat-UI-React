@@ -1,23 +1,25 @@
 import { ChatMessage } from "../Domain/ChatMessage"
-import "../css/chat.css"
+import "../css/chat.css";
+export enum ChatMessageStatus{
+    Pending=0,
+    Sent=1,
+    Seen=2
+}
 export interface ChatMessageComponentProps{
-    chatMessage:ChatMessage|null;
+    chatMessage:ChatMessage|null,
+    status:ChatMessageStatus
 }
 const ChatMessageComponent:React.FC<ChatMessageComponentProps>=({
-    chatMessage}
+    chatMessage,status}
 )=>{
     
     return (
     <>
     <div className="chatMessageContainer">
                                   <img className="icon chatMessageIcon"/>
-                                  <div className="chatMessageMeta"> 12:32 GMT +2 </div>
-                                  <div className="chatMessageContent">sugi pwla cu dan voiculescu</div>
-                                  <div className="chatMessageStatus">
-                                      <div className="chatMessageStatusPending">tick</div>
-                                      <div className="chatMessageStatusSent">tick</div>
-                                      <div className="chatMessageStatusSeen">tick</div>
-                                  </div>
+                                  <div className="chatMessageMeta">{chatMessage?.created_at}</div>
+                                  <div className="chatMessageContent">{chatMessage?.message}</div>
+                                  <div className={ChatMessageStatus[status]}/>
                               </div>
     </>);
 };

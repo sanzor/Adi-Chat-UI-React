@@ -1,4 +1,5 @@
 import { ChatMessage } from "../Domain/ChatMessage"
+import { useUser } from "../Providers/UserContext";
 import "../css/chat.css";
 export enum ChatMessageStatus{
     Pending=0,
@@ -6,13 +7,13 @@ export enum ChatMessageStatus{
     Seen=2
 }
 export interface ChatMessageComponentProps{
-    chatMessage:ChatMessage|null,
+    chatMessage:ChatMessage|null
     status:ChatMessageStatus
 }
 const ChatMessageComponent:React.FC<ChatMessageComponentProps>=({
     chatMessage,status}
 )=>{
-    
+    const {user}=useUser();
     return (
     <>
     <div className="chatMessageContainer">

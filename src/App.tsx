@@ -7,6 +7,7 @@ import { EventBusProvider } from './Components/EventBusContext';
 import { WebSocketProvider } from './Websocket/WebsocketContext';
 import { getItemFromStorage, setItemInStorage } from './Utils';
 import { User } from './Domain/User';
+import { UserProvider,useUser } from './Providers/UserContext';
 
 enum VIEWSTATE {
   LOGIN = 'login',
@@ -15,19 +16,20 @@ enum VIEWSTATE {
 }
 
 const App: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const {setUser,user}=useUser();
+  // const [user, setUser] = useState<User | null>(null);
   const [viewState, setViewState] = useState<VIEWSTATE>(VIEWSTATE.LOGIN);
 
   // Load user from local storage on initial render
-  useEffect(() => {
-    const storedUser = getItemFromStorage<User>('user');
-    if (storedUser) {
-      setUser(storedUser);
-      setViewState(VIEWSTATE.MAIN);
-    } else {
-      setViewState(VIEWSTATE.LOGIN);
-    }
-  }, []);
+  // useEffect(() => {
+  //   const storedUser = getItemFromStorage<User>('user');
+  //   if (storedUser) {
+  //     setUser(storedUser);
+  //     setViewState(VIEWSTATE.MAIN);
+  //   } else {
+  //     setViewState(VIEWSTATE.LOGIN);
+  //   }
+  // }, []);
 
   // Handlers for user actions
   const handleLoginSuccessful = (userData: User): void => {
@@ -64,6 +66,7 @@ const App: React.FC = () => {
   };
 
   return (
+    <UserProvider>
     <EventBusProvider>
       <WebSocketProvider
         onConnectSuccessful={handleConnectSuccessful}
@@ -93,6 +96,7 @@ const App: React.FC = () => {
         </div>
       </WebSocketProvider>
     </EventBusProvider>
+    </UserProvider>
   );
 };
 

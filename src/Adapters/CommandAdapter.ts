@@ -3,7 +3,7 @@ import { Command } from "../Domain/Commands/Command";
 import { DisconnectCommand } from "../Domain/Commands/DisconnectCommand";
 import { GetNewestMessagesCommand } from "../Domain/Commands/GetNewestMessagesCommand";
 import { GetOlderMessagesCommand } from "../Domain/Commands/GetOlderMessagesCommand";
-import { PublishMessageCommand } from "../Domain/Commands/PublishCommand";
+import { PublishMessageCommand } from "../Domain/Commands/PublishMessageCommand";
 import { GetSubscripttionsCommand } from "../Domain/Commands/RefreshChannelsCommand";
 import { SubscribeCommand } from "../Domain/Commands/SubscribeCommand";
 import { UnsubscribeCommand } from "../Domain/Commands/UnsubscribeCommand";

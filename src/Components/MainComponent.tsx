@@ -19,7 +19,8 @@ import { GetUserSubscriptionsResult } from "../Dtos/GetUserSubscriptionsResult";
 import { GetNewestMessagesResult } from "../Dtos/GetNewestMessagesResult";
 import { ChatMessage } from "../Domain/ChatMessage";
 import { GetNewestMessagesCommand } from "../Domain/Commands/GetNewestMessagesCommand";
-import { PublishMessageCommand } from "../Domain/Commands/PublishCommand";
+import { PublishMessageCommand } from "../Domain/Commands/PublishMessageCommand";
+import { PublishMessageParams } from "../Dtos/PublishMessageParams";
 export interface MainComponentProps{
     onLogout:()=>void;
     userdata:User|null;
@@ -89,7 +90,8 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
         };
       }, [eventBus, channels]); 
 
-      //#region messages
+      //#region message
+      // s
       useEffect(()=>{
         const handleNewMessage=(event:CustomEvent)=>{
           const newMessage:ChatMessage=event.detail;
@@ -276,7 +278,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
           return updatedChannels;
         });
       };
-    const handleChatSend=(newMessage:ChatMessage)=>{
+    const handleChatSend=(newMessage:PublishMessageParams)=>{
         eventBus.publishCommand({message:newMessage,kind:PUBLISH_MESSAGE_COMMAND} as PublishMessageCommand)
     }
     return (

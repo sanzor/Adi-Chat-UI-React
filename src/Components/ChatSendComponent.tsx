@@ -1,19 +1,17 @@
 import { useState } from "react";
-import { Channel } from "../Domain/Channel";
-import { ChatMessage } from "../Domain/ChatMessage";
-import { User } from "../Domain/User";
+import { PublishMessageParams } from "../Dtos/PublishMessageParams";
+import { UserProvider, useUser } from "../Providers/UserContext";
 
 interface ChatSendComponentProps{
-    current_channel:Channel
-    handleChatSend:(message:ChatMessage)=>void;
-    current_user:User
+    handleChatSend:(message:PublishMessageParams)=>void;
 };
 
 
-const ChatSendComponent:React.FC<ChatSendComponentProps>=({handleChatSend,current_channel,current_user})=>{
+const ChatSendComponent:React.FC<ChatSendComponentProps>=({handleChatSend})=>{
+    let {user}=useUser();
     const [messageText,setMessageText]=useState<string>("");
     const onChatSendClick=()=>{
-        let msg:ChatMessage={message:messageText,topicId:current_channel.id,userId:current_user.id};
+        let msg:PublishMessageParams={message:messageText,topicId:current_channel.id,userId:user?.id};
         handleChatSend(msg);
     };
     return (

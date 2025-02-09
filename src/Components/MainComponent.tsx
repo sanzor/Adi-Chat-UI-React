@@ -33,7 +33,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
         return storedChannels ?storedChannels: [];
     });
     const [messagesByChannel, setMessagesByChannel] = useState<Record<string, ChatMessage[]>>(() => {
-      const storedMessages = getItemFromStorage<Record<string, ChatMessage[]>>("messages");
+      const storedMessages = getItemFromStorage<Record<string, ChatMessage[]>>(MESSAGES);
       return storedMessages ? storedMessages : {};
     });
     const [subscribe,setSubscribe]=useState('');
@@ -133,11 +133,6 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
         eventBus.publishEvent(SOCKET_CLOSED,{});
         localStorage.removeItem("user");
         props.onLogout();
-    };
-    const getChannels=async():Promise<GetUserSubscriptionsResult>=>{
-       var channels=await getDataAsync(`${config.baseHttpUrl}/get_subscriptions/${props.userdata?.id}`);
-       console.log(channels);
-       return channels;
     };
 
 

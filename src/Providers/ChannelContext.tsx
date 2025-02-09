@@ -1,8 +1,7 @@
-import React, { ReactNode, useContext, useEffect, useState } from "react"
+import React, { createContext, ReactNode, useContext, useEffect, useState } from "react"
 import { Channel } from "../Domain/Channel";
-import { createContext } from "vm";
 import { getItemFromStorage, setItemInStorage } from "../Utils";
-import { CHANNELS } from "../Constants";
+import { CHANNELS, CURRENT_CHANNEL } from "../Constants";
 
 interface ChannelsContextType{
     channels:Channel[]|null;
@@ -20,6 +19,23 @@ export const ChannelsProvider:React.FC<{children:ReactNode}>=({children})=>{
             localStorage.removeItem(CHANNELS);
         }
     });
+    useEffect(() => {
+        setItemInStorage(CHANNELS, channels);
+      }, [channels]);
+    useEffect(() => {
+        setItemInStorage(CURRENT_CHANNEL, currentChannel);
+      }, [currentChannel]);
+    useEffect(()=>{
+        const fetchChannels=async()=>{
+            try{
+                const fetchedChannels=await getChannels();
+                setChannels(fetchedChannels.subscriptions);
+                setItemInStorage(CHANNELS,fetchedChannels.subscriptions);
+            }catch(error){
+                console.error("Error fetching channels",error);
+            }
+        }
+    });
     const updateChannels=(newChannels:Channel[]|null)=>{
         setChannels(newChannels);
         if(newChannels){
@@ -28,7 +44,7 @@ export const ChannelsProvider:React.FC<{children:ReactNode}>=({children})=>{
             localStorage.removeItem(CHANNELS);
         }
     };
-    return (<ChannelsContext.Provider value={{channels, updateChannels}}></ChannelsContext.Provider>);
+    return (<ChannelsContext.Provider value={{channels,setChannels: updateChannels}}></ChannelsContext.Provider>);
 };
 
 export const useChannels=()=>{

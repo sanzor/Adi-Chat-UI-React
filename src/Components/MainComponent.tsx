@@ -21,6 +21,7 @@ import { ChatMessage } from "../Domain/ChatMessage";
 import { GetNewestMessagesCommand } from "../Domain/Commands/GetNewestMessagesCommand";
 import { PublishMessageCommand } from "../Domain/Commands/PublishMessageCommand";
 import { PublishMessageParams } from "../Dtos/PublishMessageParams";
+import { useChannels } from "../Providers/ChannelContext";
 export interface MainComponentProps{
     onLogout:()=>void;
     userdata:User|null;
@@ -28,10 +29,7 @@ export interface MainComponentProps{
 const MainComponent:React.FC<MainComponentProps> =(props)=>{
    
     const eventBus=useEventBus();
-    const [channels,setChannels]=useState<Channel[]>(()=>{
-        const storedChannels=getItemFromStorage<Channel[]>(CHANNELS);
-        return storedChannels ?storedChannels: [];
-    });
+    const {channels,setChannels}=useChannels();
     const [messagesByChannel, setMessagesByChannel] = useState<Record<string, ChatMessage[]>>(() => {
       const storedMessages = getItemFromStorage<Record<string, ChatMessage[]>>(MESSAGES);
       return storedMessages ? storedMessages : {};
@@ -39,56 +37,20 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
     const [subscribe,setSubscribe]=useState('');
     const [firstChatSet,setFirstChat]=useState(false);
 
-    const [currentChannel, setCurrentChannel] = useState<Channel | null>(() => {
-        const storedCurrentChannel = localStorage.getItem(CURRENT_CHANNEL);
-        return storedCurrentChannel ? JSON.parse(storedCurrentChannel) : null;
-      });
+
     useEffect(()=>{
-        fetchChannels();
-        channels.map(channel=>{
+          fetchChannels();
+          channels?.map(channel=>{
           let command:GetNewestMessagesCommand={topicId:channel.id,count:10,kind:GET_NEWEST_MESSAGES_COMMAND};
           eventBus.publishCommand(command);
           return channel;
         });
     },[]);
-
-    const fetchChannels=async()=>{
-      try {
-        var fetchedChannelsResult:GetUserSubscriptionsResult=await getChannels();
-        console.log("Stored Channels:", fetchedChannelsResult.subscriptions);
-        setItemInStorage(CHANNELS,fetchedChannelsResult.subscriptions);
-        setChannels(prevChannels => {
-          console.log("Previous Channels:", prevChannels);
-          console.log("New Channels:", fetchedChannelsResult.subscriptions);
-          return [...fetchedChannelsResult.subscriptions];
-      });
-      } catch (error) {
-        console.error("Error fetching channels:", error);
-      }
-    };
  // Dependencies to ensure the effect re-runs if `userdata` changes // Only re-run when `userdata` changes
     useEffect(()=>{
         setItemInStorage(CHANNELS,channels);
         console.log(channels);
     },[channels]);
-
-    useEffect(()=>{
-        setItemInStorage(CURRENT_CHANNEL,currentChannel);
-    },[currentChannel]);
-
-    useEffect(() => {
-        const handleAddChannel = (channel: Channel) => {
-          // Use the latest channelsRef value to check for duplicates
-          if (!channels.find((c) => c.id === channel.id)) {
-            const newChannelList = [...channels, channel];
-            setChannels(newChannelList);
-          }
-        };
-        eventBus.subscribe(ADD_CHANNEL, handleAddChannel);
-        return () => {
-          eventBus.unsubscribe(ADD_CHANNEL, handleAddChannel);
-        };
-      }, [eventBus, channels]); 
 
       //#region message
       // s
@@ -186,8 +148,8 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
         };
       
         // Add the channel to the state if it's new
-        if (!channels.find((channel) => channel.id === targetChannel.id)) {
-          const updatedChannels = [...channels, targetChannel];
+        if (!channels?.find((channel) => channel.id === targetChannel.id)) {
+          const updatedChannels = [...channels!, targetChannel];
           console.log(updatedChannels);
           setChannels(updatedChannels);
           eventBus.publishEvent(ADD_CHANNEL, targetChannel);

@@ -7,6 +7,7 @@ import { GetUserSubscriptionsResult } from "../Dtos/GetUserSubscriptionsResult";
 import config from "../Config";
 import { useUser } from "./UserContext";
 import { User } from "../Domain/User";
+import { ADD_CHANNEL, REMOVE_CHANNEL } from "../Events";
 
 interface ChannelsContextType{
     channels:Channel[]|null;
@@ -23,8 +24,41 @@ const getChannels=async(user:User):Promise<GetUserSubscriptionsResult>=>{
 export const ChannelsProvider:React.FC<{children:ReactNode}>=({children})=>{
     const eventBus=useEventBus();
     const {user}=useUser();
-    const [channels,setChannels]=useState<Channel[]|null>(null);
-    const [currentChannel,setCurrentChannel]=useState<Channel|null>(null);
+    const [channels,setChannels]=useState<Channel[]>(()=>{
+        const storedChannels=getItemFromStorage<Channel[]>(CHANNELS);
+        return storedChannels ?storedChannels: [];
+    });
+    const [currentChannel, setCurrentChannel] = useState<Channel | null>(() => {
+        const storedCurrentChannel = localStorage.getItem(CURRENT_CHANNEL);
+        return storedCurrentChannel ? JSON.parse(storedCurrentChannel) : null;
+      });
+    useEffect(()=>{
+        setItemInStorage(CHANNELS,channels);
+        console.log(channels);
+    },[channels]);
+
+    useEffect(()=>{
+        setItemInStorage(CURRENT_CHANNEL,currentChannel);
+    },[currentChannel]);
+    useEffect(() => {
+        const handleAddChannel = (channel: Channel) => {
+          // Use the latest channelsRef value to check for duplicates
+          if (!channels.find((c) => c.id === channel.id)) {
+            const newChannelList = [...channels, channel];
+            setChannels(newChannelList);
+          }
+        };
+        const handleRemoveChannel = (channelId: number) => {
+            setChannels((prev) => prev.filter((c) => c.id !== channelId));
+        };
+        eventBus.subscribe(ADD_CHANNEL, handleAddChannel);
+        eventBus.subscribe(REMOVE_CHANNEL,handleRemoveChannel);
+        return () => {
+          eventBus.unsubscribe(ADD_CHANNEL, handleAddChannel);
+          eventBus.unsubscribe(REMOVE_CHANNEL,handleRemoveChannel);
+        };
+      }, [eventBus]); 
+      
     const fetchChannels=async()=>{
         try {
           var fetchedChannelsResult:GetUserSubscriptionsResult=await getChannels(user!);

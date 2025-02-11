@@ -1,28 +1,20 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { SUBSCRIBE_COMMAND_RESULT_U,
          SET_CHAT} from "../Events";
 import { Channel } from "../Domain/Channel";
 import ChannelComponent from "./ChannelComponent";
 import { useEventBus } from "./EventBusContext";
 import '../css/channels.css';
+import { useChannels } from "../Providers/ChannelContext";
 export interface ChannelsComponentProps{
-    channels:Channel[],
-    setChannels:React.Dispatch<React.SetStateAction<Channel[]>>,
-    setCurrentChannel:React.Dispatch<React.SetStateAction<Channel|null>>;
-    currentChannel:Channel|null;
     handleUnsubscribe:(channel:Channel)=>void;
 }
 const ChannelsComponent:React.FC<ChannelsComponentProps>=({
-    channels,
-    setCurrentChannel,
     handleUnsubscribe})=>{
    const EventBus = useEventBus();
-   const channelsRef = useRef<Channel[]>(channels);
-   
-   useEffect(() => {
-        channelsRef.current = channels;
-      }, [channels]);
-        useEffect(()=>{
+   const {channels,setCurrentChannel}=useChannels();
+
+    useEffect(()=>{
         EventBus.subscribe(SUBSCRIBE_COMMAND_RESULT_U,()=>{});//onSubscribeResultU);
     },[]);
 

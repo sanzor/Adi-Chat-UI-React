@@ -12,7 +12,8 @@ import { ADD_CHANNEL, REMOVE_CHANNEL } from "../Events";
 interface ChannelsContextType{
     channels:Channel[]|null;
     currentChannel:Channel|null;
-    setChannels:(channels:Channel[]|null)=>void;
+    setCurrentChannel:(channel:Channel|null)=>void;
+    setChannels:(channels:Channel[] |((prevChannels:Channel[])=>Channel[]))=>void;
 };
 const ChannelsContext=createContext<ChannelsContextType | undefined>(undefined);
 const getChannels=async(user:User):Promise<GetUserSubscriptionsResult>=>{
@@ -40,6 +41,7 @@ export const ChannelsProvider:React.FC<{children:ReactNode}>=({children})=>{
     useEffect(()=>{
         setItemInStorage(CURRENT_CHANNEL,currentChannel);
     },[currentChannel]);
+    
     useEffect(() => {
         const handleAddChannel = (channel: Channel) => {
           // Use the latest channelsRef value to check for duplicates
@@ -73,40 +75,8 @@ export const ChannelsProvider:React.FC<{children:ReactNode}>=({children})=>{
           console.error("Error fetching channels:", error);
         }
       };
-    useEffect(()=>{
-        const storedChannels=getItemFromStorage<Channel[]>(CHANNELS);
-        if(storedChannels){
-            setChannels(storedChannels);
-        }else{
-            localStorage.removeItem(CHANNELS);
-        }
-    });
-    useEffect(() => {
-        setItemInStorage(CHANNELS, channels);
-      }, [channels]);
-    useEffect(() => {
-        setItemInStorage(CURRENT_CHANNEL, currentChannel);
-      }, [currentChannel]);
-    useEffect(()=>{
-        const fetchChannels=async()=>{
-            try{
-                const fetchedChannels=await getChannels(user!);
-                setChannels(fetchedChannels.subscriptions);
-                setItemInStorage(CHANNELS,fetchedChannels.subscriptions);
-            }catch(error){
-                console.error("Error fetching channels",error);
-            }
-        }
-    });
-    const updateChannels=(newChannels:Channel[]|null)=>{
-        setChannels(newChannels);
-        if(newChannels){
-            setItemInStorage(CHANNELS,newChannels);
-        }else{
-            localStorage.removeItem(CHANNELS);
-        }
-    };
-    return (<ChannelsContext.Provider value={{channels,setChannels: updateChannels}}></ChannelsContext.Provider>);
+
+    return (<ChannelsContext.Provider value={{channels,setChannels: updateChannels,currentChannel:currentChannel,setCurrentChannel:setCurrentChannel}}></ChannelsContext.Provider>);
 };
 
 export const useChannels=()=>{

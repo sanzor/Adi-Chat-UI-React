@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
 import LoginComponent from './Components/LoginComponent';
 import RegisterComponent from './Components/RegisterComponent';
 import MainComponent from './Components/MainComponent';
-import { EventBusProvider } from './Components/EventBusContext';
-import { WebSocketProvider } from './Websocket/WebsocketContext';
-import { getItemFromStorage, setItemInStorage } from './Utils';
+import { setItemInStorage } from './Utils';
 import { User } from './Domain/User';
-import { UserProvider,useUser } from './Providers/UserContext';
+import { useUser } from './Providers/UserContext';
+import { WebSocketProvider } from './Providers/WebsocketContext';
 
 enum VIEWSTATE {
   LOGIN = 'login',
@@ -16,22 +15,16 @@ enum VIEWSTATE {
 }
 
 const App: React.FC = () => {
+ // ✅ Reacts to user state change
   const {setUser,user}=useUser();
+  useEffect(() => {
+    console.log("App rendering, current user:", user);
+    if (user) {
+      setViewState(VIEWSTATE.MAIN);
+    }
+  }, [user]);
   // const [user, setUser] = useState<User | null>(null);
   const [viewState, setViewState] = useState<VIEWSTATE>(VIEWSTATE.LOGIN);
-
-  // Load user from local storage on initial render
-  // useEffect(() => {
-  //   const storedUser = getItemFromStorage<User>('user');
-  //   if (storedUser) {
-  //     setUser(storedUser);
-  //     setViewState(VIEWSTATE.MAIN);
-  //   } else {
-  //     setViewState(VIEWSTATE.LOGIN);
-  //   }
-  // }, []);
-
-  // Handlers for user actions
   const handleLoginSuccessful = (userData: User): void => {
     console.log(`Login successful. Setting user to: ${JSON.stringify(userData)}`);
     setUser(userData);
@@ -66,8 +59,6 @@ const App: React.FC = () => {
   };
 
   return (
-    <UserProvider>
-    <EventBusProvider>
       <WebSocketProvider
         onConnectSuccessful={handleConnectSuccessful}
         onConnectFailed={handleConnectFailed}
@@ -90,13 +81,10 @@ const App: React.FC = () => {
           {viewState === VIEWSTATE.MAIN && (
             <MainComponent
               onLogout={handleLogout}
-              userdata={user}
             />
           )}
         </div>
       </WebSocketProvider>
-    </EventBusProvider>
-    </UserProvider>
   );
 };
 

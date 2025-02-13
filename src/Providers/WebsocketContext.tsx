@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
-import { useEventBus } from "../Components/EventBusContext";
+import { useEventBus } from "./EventBusContext";
 import config from "../Config";
-import { WebSocketController } from "./WebsocketController";
 import { User } from "../Domain/User";
-import { MessageService } from "./MessageService";
+import { WebSocketController } from "../Websocket/WebsocketController";
+import { MessageService } from "../Websocket/MessageService";
+
 
 // Define the shape of the WebSocket state
 interface WebSocketState {

@@ -3,13 +3,22 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { UserProvider } from './Providers/UserContext';
+import { ChannelsProvider } from './Providers/ChannelContext';
+import { EventBusProvider } from './Providers/EventBusContext';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <App />
+        <EventBusProvider>
+          <UserProvider>
+            <ChannelsProvider>
+              <App/>
+            </ChannelsProvider>    
+          </UserProvider>
+        </EventBusProvider>
   </React.StrictMode>
 );
 

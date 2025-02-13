@@ -2,7 +2,7 @@ import React, { createContext, ReactNode, useContext, useEffect, useState } from
 import { Channel } from "../Domain/Channel";
 import { getDataAsync, getItemFromStorage, setItemInStorage } from "../Utils";
 import { CHANNELS, CURRENT_CHANNEL } from "../Constants";
-import { useEventBus } from "../Components/EventBusContext";
+import { useEventBus } from "./EventBusContext";
 import { GetUserSubscriptionsResult } from "../Dtos/GetUserSubscriptionsResult";
 import config from "../Config";
 import { useUser } from "./UserContext";
@@ -76,7 +76,7 @@ export const ChannelsProvider:React.FC<{children:ReactNode}>=({children})=>{
         }
       };
 
-    return (<ChannelsContext.Provider value={{channels,setChannels: updateChannels,currentChannel:currentChannel,setCurrentChannel:setCurrentChannel}}></ChannelsContext.Provider>);
+    return (<ChannelsContext.Provider value={{channels,setChannels,currentChannel:currentChannel,setCurrentChannel}}>{children}</ChannelsContext.Provider>);
 };
 
 export const useChannels=()=>{

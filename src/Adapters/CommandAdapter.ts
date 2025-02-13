@@ -102,8 +102,8 @@ function create_command_publish(command:PublishMessageCommand):PublishCommandDto
    
     var toSend:PublishCommandDto={
         command:PUBLISH_MESSAGE_COMMAND,
-        topicId:command.topicId,
-        content:command.message
+        topicId:command.message.topicId,
+        content:command.message.message
     };
     return toSend;
 }

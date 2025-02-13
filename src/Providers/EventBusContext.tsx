@@ -1,6 +1,6 @@
 // EventBusContext.tsx
 import React, { createContext, useContext } from 'react';// Import the singleton instance
-import { EventBus } from './EventBus';
+import { EventBus } from '../Components/EventBus';
 const eventBusInstance = new EventBus();
 // Define a type for the EventBus instance
 type EventBusType = EventBus;

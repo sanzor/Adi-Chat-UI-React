@@ -14,6 +14,7 @@ interface UserContextType {
     const [user, setUser] = useState<User | null>(null);
     useEffect(()=>{
        const storedUser=getItemFromStorage<User>(USER);
+       console.log(storedUser);
        if(storedUser){
         setUser(storedUser);
        }
@@ -27,8 +28,9 @@ interface UserContextType {
           localStorage.removeItem(USER);
         }
     }
+    console.log("UserProvider rendering. Current user:", user);
     return (
-      <UserContext.Provider value={{user,setUser:updateUser}}></UserContext.Provider>
+      <UserContext.Provider value={{user,setUser:updateUser}}>{children}</UserContext.Provider>
     )
   };
 

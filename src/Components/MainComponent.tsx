@@ -6,14 +6,13 @@ import '../css/specific.css';
 import '../css/general.css';
 import { SubscribeCommandResultDto } from "../Dtos/SocketCommandResults/SubscribeCommandResultDto";
 import { ADD_CHANNEL, GET_NEWEST_MESSAGES_COMMAND, GET_NEWEST_MESSAGES_COMMAND_RESULT, NEW_INCOMING_MESSAGE, PUBLISH_MESSAGE_COMMAND, REFRESH_CHANNELS_COMMAND_RESULT, REMOVE_CHANNEL, RESET_CHAT, SET_CHAT, SOCKET_CLOSED, SUBSCRIBE_COMMAND, SUBSCRIBE_COMMAND_RESULT_COMPONENT, UNSUBSCRIBE_COMMAND, UNSUBSCRIBE_COMMAND_RESULT } from "../Events";
-import { useEventBus } from "./EventBusContext";
-import { CHANNELS, MESSAGES, TOPIC_ID } from "../Constants";
+import { useEventBus } from "../Providers/EventBusContext";
+import { MESSAGES, TOPIC_ID } from "../Constants";
 import { SubscribeCommand } from "../Domain/Commands/SubscribeCommand";
 import { getItemFromStorage, setItemInStorage } from "../Utils";
 import { Channel } from "../Domain/Channel";
 import { UnsubscribeCommandResultDto } from "../Dtos/SocketCommandResults/UnsubscrirbeCommandResultDto";
 import { UnsubscribeCommand } from "../Domain/Commands/UnsubscribeCommand";
-import { User } from "../Domain/User";
 import { GetNewestMessagesResult } from "../Dtos/GetNewestMessagesResult";
 import { ChatMessage } from "../Domain/ChatMessage";
 import { GetNewestMessagesCommand } from "../Domain/Commands/GetNewestMessagesCommand";
@@ -22,7 +21,6 @@ import { PublishMessageParams } from "../Dtos/PublishMessageParams";
 import { useChannels } from "../Providers/ChannelContext";
 export interface MainComponentProps{
     onLogout:()=>void;
-    userdata:User|null;
 }
 const MainComponent:React.FC<MainComponentProps> =(props)=>{
    

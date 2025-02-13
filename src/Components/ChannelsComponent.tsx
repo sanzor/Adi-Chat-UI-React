@@ -3,7 +3,7 @@ import { SUBSCRIBE_COMMAND_RESULT_U,
          SET_CHAT} from "../Events";
 import { Channel } from "../Domain/Channel";
 import ChannelComponent from "./ChannelComponent";
-import { useEventBus } from "./EventBusContext";
+import { useEventBus } from "../Providers/EventBusContext";
 import '../css/channels.css';
 import { useChannels } from "../Providers/ChannelContext";
 export interface ChannelsComponentProps{

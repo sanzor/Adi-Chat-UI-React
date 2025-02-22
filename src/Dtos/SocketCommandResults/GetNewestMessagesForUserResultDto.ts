@@ -1,7 +1,8 @@
-import{ GET_NEWEST_MESSAGES_FOR_USER } from '../../Events';
+
+import { GET_NEWEST_MESSAGES_FOR_USER_COMMAND } from '../../Events';
+import { ChannelWithMessagesDto } from '../ChannelWithMessagesDto';
 import {BaseCommandResultDto} from './BaseCommandResultDto';
-import { ChatMessageDto } from './ChatMessageDto';
-export interface GetNewestMessagesForUser extends BaseCommandResultDto{
-    command:typeof GET_NEWEST_MESSAGES_FOR_USER;
-    messages:[ChatMessageDto]
+export interface GetNewestMessagesForUserCommandResultDto extends BaseCommandResultDto{
+    command:typeof GET_NEWEST_MESSAGES_FOR_USER_COMMAND;
+    channels_with_messages:[ChannelWithMessagesDto]
 };

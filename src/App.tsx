@@ -7,6 +7,7 @@ import { setItemInStorage } from './Utils';
 import { User } from './Domain/User';
 import { useUser } from './Providers/UserContext';
 import { WebSocketProvider } from './Providers/WebsocketContext';
+import { ChannelsProvider } from './Providers/ChannelContext';
 
 enum VIEWSTATE {
   LOGIN = 'login',
@@ -79,9 +80,12 @@ const App: React.FC = () => {
             />
           )}
           {viewState === VIEWSTATE.MAIN && (
-            <MainComponent
-              onLogout={handleLogout}
-            />
+            <ChannelsProvider>
+                <MainComponent
+                  onLogout={handleLogout}
+                />
+            </ChannelsProvider>
+            
           )}
         </div>
       </WebSocketProvider>

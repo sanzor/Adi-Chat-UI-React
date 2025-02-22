@@ -5,7 +5,7 @@ import ChatSendComponent from "./ChatSendComponent";
 import '../css/specific.css';
 import '../css/general.css';
 import { SubscribeCommandResultDto } from "../Dtos/SocketCommandResults/SubscribeCommandResultDto";
-import { ADD_CHANNEL, GET_NEWEST_MESSAGES_COMMAND, GET_NEWEST_MESSAGES_COMMAND_RESULT, NEW_INCOMING_MESSAGE, PUBLISH_MESSAGE_COMMAND, REFRESH_CHANNELS_COMMAND_RESULT, REMOVE_CHANNEL, RESET_CHAT, SET_CHAT, SOCKET_CLOSED, SUBSCRIBE_COMMAND, SUBSCRIBE_COMMAND_RESULT_COMPONENT, UNSUBSCRIBE_COMMAND, UNSUBSCRIBE_COMMAND_RESULT } from "../Events";
+import { ADD_CHANNEL, GET_NEWEST_MESSAGES_COMMAND_RESULT, NEW_INCOMING_MESSAGE, PUBLISH_MESSAGE_COMMAND, REFRESH_CHANNELS_COMMAND_RESULT, REMOVE_CHANNEL, RESET_CHAT, SET_CHAT, SOCKET_CLOSED, SUBSCRIBE_COMMAND, SUBSCRIBE_COMMAND_RESULT_COMPONENT, UNSUBSCRIBE_COMMAND, UNSUBSCRIBE_COMMAND_RESULT } from "../Events";
 import { useEventBus } from "../Providers/EventBusContext";
 import { MESSAGES, TOPIC_ID } from "../Constants";
 import { SubscribeCommand } from "../Domain/Commands/SubscribeCommand";
@@ -15,7 +15,6 @@ import { UnsubscribeCommandResultDto } from "../Dtos/SocketCommandResults/Unsubs
 import { UnsubscribeCommand } from "../Domain/Commands/UnsubscribeCommand";
 import { GetNewestMessagesResult } from "../Dtos/GetNewestMessagesResult";
 import { ChatMessage } from "../Domain/ChatMessage";
-import { GetNewestMessagesCommand } from "../Domain/Commands/GetNewestMessagesCommand";
 import { PublishMessageCommand } from "../Domain/Commands/PublishMessageCommand";
 import { PublishMessageParams } from "../Dtos/PublishMessageParams";
 import { useChannels } from "../Providers/ChannelContext";
@@ -34,13 +33,6 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
     const [firstChatSet,setFirstChat]=useState(false);
 
 
-    useEffect(()=>{
-          channels?.map(channel=>{
-          let command:GetNewestMessagesCommand={topicId:channel.id,count:10,kind:GET_NEWEST_MESSAGES_COMMAND};
-          eventBus.publishCommand(command);
-          return channel;
-        });
-    },[]);
  // Dependencies to ensure the effect re-runs if `userdata` changes // Only re-run when `userdata` changes
       //#region message
       // s

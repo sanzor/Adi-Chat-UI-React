@@ -4,7 +4,6 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { UserProvider } from './Providers/UserContext';
-import { ChannelsProvider } from './Providers/ChannelContext';
 import { EventBusProvider } from './Providers/EventBusContext';
 
 const root = ReactDOM.createRoot(
@@ -14,9 +13,7 @@ root.render(
   <React.StrictMode>
         <EventBusProvider>
           <UserProvider>
-            <ChannelsProvider>
-              <App/>
-            </ChannelsProvider>    
+              <App/> 
           </UserProvider>
         </EventBusProvider>
   </React.StrictMode>

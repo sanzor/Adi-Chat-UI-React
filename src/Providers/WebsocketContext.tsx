@@ -14,19 +14,19 @@ interface WebSocketState {
 }
 
 // Extend the context to include the WebSocket state
-interface WebSocketContextValue {
-  controller: WebSocketController;
-  state: WebSocketState;
-}
+  interface WebSocketContextValue {
+    controller: WebSocketController;
+    state: WebSocketState;
+  }
 
-const WebSocketContext = createContext<WebSocketContextValue | undefined>(undefined);
+  const WebSocketContext = createContext<WebSocketContextValue | undefined>(undefined);
 
-export const WebSocketProvider: React.FC<{
-  children: React.ReactNode;
-  onConnectSuccessful?: () => void;
-  onConnectFailed?: () => void;
-  user:User|null;
-}> = ({ children, onConnectSuccessful, onConnectFailed,user }) => {
+  export const WebSocketProvider: React.FC<{
+    children: React.ReactNode;
+    onConnectSuccessful?: () => void;
+    onConnectFailed?: () => void;
+    user:User|null;
+  }> = ({ children, onConnectSuccessful, onConnectFailed,user }) => {
   const eventBus = useEventBus();
   const messageService = new MessageService(eventBus);
   const controllerRef = useRef<WebSocketController | null>(null);

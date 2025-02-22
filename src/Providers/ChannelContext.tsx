@@ -7,7 +7,8 @@ import { GetUserSubscriptionsResult } from "../Dtos/GetUserSubscriptionsResult";
 import config from "../Config";
 import { useUser } from "./UserContext";
 import { User } from "../Domain/User";
-import { ADD_CHANNEL, REMOVE_CHANNEL } from "../Events";
+import { ADD_CHANNEL, GET_NEWEST_MESSAGES_FOR_USER_COMMAND, REMOVE_CHANNEL } from "../Events";
+import { GetNewestMessagesForUserCommand } from "../Domain/Commands/GetNewestMessagesForUserCommand";
 
 interface ChannelsContextType{
     channels:Channel[]|null;
@@ -24,7 +25,9 @@ const getChannels=async(user:User):Promise<GetUserSubscriptionsResult>=>{
 
 export const ChannelsProvider:React.FC<{children:ReactNode}>=({children})=>{
     const eventBus=useEventBus();
+    console.log("inside channels provider");
     const {user}=useUser();
+    console.log("after fetching user");
     const [channels,setChannels]=useState<Channel[]>(()=>{
         const storedChannels=getItemFromStorage<Channel[]>(CHANNELS);
         return storedChannels ?storedChannels: [];
@@ -42,6 +45,15 @@ export const ChannelsProvider:React.FC<{children:ReactNode}>=({children})=>{
         setItemInStorage(CURRENT_CHANNEL,currentChannel);
     },[currentChannel]);
     
+    useEffect(()=>{
+              console.log("sugi");
+              channels?.map(channel=>{
+              let command:GetNewestMessagesForUserCommand={user_id:user!.id,count:10,kind:GET_NEWEST_MESSAGES_FOR_USER_COMMAND};
+              console.log(command);
+              eventBus.publishCommand(command);
+              return channel;
+            });
+    },[]);
     useEffect(() => {
         const handleAddChannel = (channel: Channel) => {
           // Use the latest channelsRef value to check for duplicates

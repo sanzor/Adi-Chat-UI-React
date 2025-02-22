@@ -9,6 +9,7 @@ import { SubscribeCommand } from "../Domain/Commands/SubscribeCommand";
 import { UnsubscribeCommand } from "../Domain/Commands/UnsubscribeCommand";
 import { DISCONNECT_COMMAND,
         GET_NEWEST_MESSAGES_COMMAND,
+        GET_NEWEST_MESSAGES_FOR_USER_COMMAND,
         GET_OLDER_MESSAGES_COMMAND,
         PUBLISH_MESSAGE_COMMAND,
         REFRESH_CHANNELS_COMMAND,
@@ -20,8 +21,11 @@ import { UnsubscribeCommandDto } from "../Dtos/SocketCommands/UnsubscribeCommand
 import { GetSubscriptionsCommandDto } from "../Dtos/SocketCommands/GetSubscriptionsCommandDto";
 import { PublishCommandDto } from "../Dtos/SocketCommands/PublishCommandDto";
 import { DisconnectCommandDto } from "../Dtos/SocketCommands/DisconnectCommandDto";
-import { GetNewestMessagesCommandDto } from "../Dtos/SocketCommands/GetNewestMessagesDto";
+import { GetNewestMessagesCommandDto } from "../Dtos/SocketCommands/GetNewestMessagesCommandDto";
 import { GetOlderMessagesDto as GetOlderMessagesCommandDto } from "../Dtos/SocketCommands/GetOlderMessagesDto";
+import { GetNewestMessagesForUserCommand } from "../Domain/Commands/GetNewestMessagesForUserCommand";
+import { GetNewestMessagesForUserCommandDto } from "../Dtos/SocketCommands/GetNewestMessagesForUserCommandDto";
+
 
 export function createSocketCommand(data:Command):BaseCommandDto|null{
     var command=innerCreateCommand(data);
@@ -61,8 +65,14 @@ function innerCreateCommand(data:Command): BaseCommandDto|null{
                 var command=data as GetOlderMessagesCommand;
                 return command_get_older_messages(command);
             }
+            break;
+        case GET_NEWEST_MESSAGES_FOR_USER_COMMAND:
+            if(isGetNewestMessagesForUserCommand(data)){
+                var newestMessagesForUserCommand=data as GetNewestMessagesForUserCommand;
+                return command_get_newest_messages_for_user(newestMessagesForUserCommand);
+            }
+            break;
            
-        break;
         default:return null;
     }
     return null;
@@ -117,6 +127,15 @@ function command_get_newest_messages(command:GetNewestMessagesCommand):GetNewest
     }
     return message;
 }
+
+function command_get_newest_messages_for_user(command:GetNewestMessagesForUserCommand):GetNewestMessagesForUserCommandDto{
+    var message:GetNewestMessagesForUserCommandDto={
+        command:GET_NEWEST_MESSAGES_FOR_USER_COMMAND,
+        user_id:command.user_id,
+        count:command.count,
+    }
+    return message;
+}
 function command_get_older_messages(command:GetOlderMessagesCommand):GetOlderMessagesCommandDto{
     var message:GetOlderMessagesCommandDto={
         command:GET_OLDER_MESSAGES_COMMAND,
@@ -154,5 +173,9 @@ function isGetNewestMessagesCommand(command: Command): command is GetNewestMessa
 
 function isGetOlderMessagesCommand(command: Command): command is GetOlderMessagesCommand {
     return command.kind === GET_OLDER_MESSAGES_COMMAND;
+}
+
+function isGetNewestMessagesForUserCommand(command: Command): command is GetNewestMessagesForUserCommand {
+    return command.kind === GET_NEWEST_MESSAGES_FOR_USER_COMMAND;
 }
 

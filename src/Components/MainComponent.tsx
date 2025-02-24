@@ -226,7 +226,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
     {/* <div id="parentPanel" className="parent"> */}
     <div id="mainPanel" className="mainPanel">
         <button id="logoutBtn" onClick={handleLogout}>Logout</button>
-        <div id="subscribeButtonPanel" className="panel">
+        <div id="subscribeButtonPanel" className="panel"> 
             <input  id="subscribeBox" type="text" value={subscribe} onChange={(e)=>setSubscribe(e.target.value)}/>
             <label id="subscribeLabel" className="subscribeLabel" >Channel</label>
             <button id="subscribeBtn" className="subscribeButton" onClick={handleSubscribe}>Subscribe</button>

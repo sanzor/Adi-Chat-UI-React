@@ -17,7 +17,9 @@ import {
     UNSUBSCRIBE_COMMAND_RESULT,
     UNSUBSCRIBE_COMMAND_RESULT_U,
     RESET_CHAT,
-    SUBSCRIBE_COMMAND_RESULT_COMPONENT
+    SUBSCRIBE_COMMAND_RESULT_COMPONENT,
+    GET_NEWEST_MESSAGES_FOR_USER_COMMAND,
+    GET_NEWEST_MESSAGES_FOR_USER_COMMAND_RESULT
 } from "../Events";
 
 export class MessageService {
@@ -68,11 +70,13 @@ export class MessageService {
       case GET_NEWEST_MESSAGES_COMMAND:
         this.handleGetNewestMessagesCommandResult(data.result);
         break;
-
+      
+      case GET_NEWEST_MESSAGES_FOR_USER_COMMAND:
+        this.handleGetNewestMessagesForUserCommandResult(data.result);
+        break;
       case GET_OLDER_MESSAGES_COMMAND:
         this.handleGetOlderMessagesCommandResult(data.result);
         break;
-
       default:
         console.warn("Unknown command result:", data.command);
     }
@@ -102,6 +106,11 @@ export class MessageService {
   private handleGetNewestMessagesCommandResult(data: any) {
     console.log("Newest messages received:", data.messages);
     this.eventBus.publishEvent("getNewestMessages", data.messages);
+  }
+
+  private handleGetNewestMessagesForUserCommandResult(data: any) {
+    console.log("Newest messages for user received:", data);
+    this.eventBus.publishEvent(GET_NEWEST_MESSAGES_FOR_USER_COMMAND_RESULT, data);
   }
 
   private handleGetOlderMessagesCommandResult(data: any) {

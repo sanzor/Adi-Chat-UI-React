@@ -1,20 +1,30 @@
 import React, { createContext, ReactNode, useContext, useEffect, useState } from "react"
 import { Channel } from "../Domain/Channel";
 import { getDataAsync, getItemFromStorage, setItemInStorage } from "../Utils";
-import { CHANNELS, CURRENT_CHANNEL } from "../Constants";
+import { CHANNELS, CURRENT_CHANNEL, MESSAGES } from "../Constants";
 import { useEventBus } from "./EventBusContext";
 import { GetUserSubscriptionsResult } from "../Dtos/GetUserSubscriptionsResult";
 import config from "../Config";
 import { useUser } from "./UserContext";
 import { User } from "../Domain/User";
-import { ADD_CHANNEL, GET_NEWEST_MESSAGES_FOR_USER_COMMAND, REMOVE_CHANNEL } from "../Events";
+import { ADD_CHANNEL, GET_NEWEST_MESSAGES_FOR_USER_COMMAND, GET_NEWEST_MESSAGES_FOR_USER_COMMAND_RESULT, REMOVE_CHANNEL } from "../Events";
 import { GetNewestMessagesForUserCommand } from "../Domain/Commands/GetNewestMessagesForUserCommand";
+import { useWebSocket } from "./WebsocketContext";
+import { GetNewestMessagesForUserCommandResultDto } from "../Dtos/SocketCommandResults/GetNewestMessagesForUserResultDto";
+import { ChannelWithMessagesDto } from "../Dtos/ChannelWithMessagesDto";
 
 interface ChannelsContextType{
     channels:Channel[]|null;
     currentChannel:Channel|null;
     setCurrentChannel:(channel:Channel|null)=>void;
     setChannels:(channels:Channel[] |((prevChannels:Channel[])=>Channel[]))=>void;
+    messagesMap: Map<number, ChannelWithMessagesDto> | null;
+    setMessagesMap: (
+      map:
+        | Map<number, ChannelWithMessagesDto> | null
+        | ((prevMap: Map<number, ChannelWithMessagesDto> | null) => Map<number, ChannelWithMessagesDto> | null)
+    ) => void;
+    updateMessageForChannel: (channelId: number, newData: ChannelWithMessagesDto) => void;
 };
 const ChannelsContext=createContext<ChannelsContextType | undefined>(undefined);
 const getChannels=async(user:User):Promise<GetUserSubscriptionsResult>=>{
@@ -24,10 +34,10 @@ const getChannels=async(user:User):Promise<GetUserSubscriptionsResult>=>{
  };
 
 export const ChannelsProvider:React.FC<{children:ReactNode}>=({children})=>{
+    const {state:{isConnected}}=useWebSocket();
     const eventBus=useEventBus();
-    console.log("inside channels provider");
     const {user}=useUser();
-    console.log("after fetching user");
+
     const [channels,setChannels]=useState<Channel[]>(()=>{
         const storedChannels=getItemFromStorage<Channel[]>(CHANNELS);
         return storedChannels ?storedChannels: [];
@@ -36,6 +46,19 @@ export const ChannelsProvider:React.FC<{children:ReactNode}>=({children})=>{
         const storedCurrentChannel = localStorage.getItem(CURRENT_CHANNEL);
         return storedCurrentChannel ? JSON.parse(storedCurrentChannel) : null;
       });
+    const updateMessageForChannel = (channelId: number, newData: ChannelWithMessagesDto) => {
+        setMessagesMap((prevMap) => {
+          // Create a new Map instance to trigger state update
+          const updatedMap = new Map(prevMap ?? []);
+          updatedMap.set(channelId, newData);
+          return updatedMap;
+        });
+      };
+    const [messagesMap, setMessagesMap] = useState<Map<number, ChannelWithMessagesDto> | null>(() => {
+        const storedMessagesMap = getItemFromStorage<Map<number, ChannelWithMessagesDto>>(MESSAGES);
+        return storedMessagesMap ? storedMessagesMap : new Map();
+    });
+    
     useEffect(()=>{
         setItemInStorage(CHANNELS,channels);
         console.log(channels);
@@ -46,13 +69,26 @@ export const ChannelsProvider:React.FC<{children:ReactNode}>=({children})=>{
     },[currentChannel]);
     
     useEffect(()=>{
-              console.log("sugi");
-              channels?.map(channel=>{
+      const handleGetNewestMessagesForUser=(ev:CustomEvent)=>{
+          var topicsWithChannels:GetNewestMessagesForUserCommandResultDto=ev.detail;
+          const map = new Map<number, ChannelWithMessagesDto>(
+            topicsWithChannels.channels_with_messages.map(item => [item.channel.id, item])
+          );
+          setMessagesMap(map);
+      };
+      if(!isConnected){
+        return;
+      }
+      channels?.map(channel=>{
               let command:GetNewestMessagesForUserCommand={user_id:user!.id,count:10,kind:GET_NEWEST_MESSAGES_FOR_USER_COMMAND};
               console.log(command);
               eventBus.publishCommand(command);
               return channel;
-            });
+          });
+      eventBus.subscribe(GET_NEWEST_MESSAGES_FOR_USER_COMMAND_RESULT,handleGetNewestMessagesForUser);
+      return ()=>{
+        eventBus.unsubscribe(GET_NEWEST_MESSAGES_FOR_USER_COMMAND_RESULT,handleGetNewestMessagesForUser);
+      }
     },[]);
     useEffect(() => {
         const handleAddChannel = (channel: Channel) => {
@@ -88,7 +124,7 @@ export const ChannelsProvider:React.FC<{children:ReactNode}>=({children})=>{
         }
       };
 
-    return (<ChannelsContext.Provider value={{channels,setChannels,currentChannel:currentChannel,setCurrentChannel}}>{children}</ChannelsContext.Provider>);
+    return (<ChannelsContext.Provider value={{channels,setChannels,currentChannel:currentChannel,setCurrentChannel,messagesMap,setMessagesMap,updateMessageForChannel}}>{children}</ChannelsContext.Provider>);
 };
 
 export const useChannels=()=>{

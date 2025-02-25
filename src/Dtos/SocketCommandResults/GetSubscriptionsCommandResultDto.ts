@@ -4,5 +4,5 @@ import { SubscriptionDto } from "./SubscriptionDto";
 
 export interface GetSubscriptionsCommandResultDto extends BaseCommandResultDto{
     command: typeof REFRESH_CHANNELS_COMMAND;
-    result:[SubscriptionDto]
+    result:SubscriptionDto[]
 };

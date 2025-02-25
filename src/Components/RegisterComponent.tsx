@@ -62,7 +62,6 @@ const RegisterComponent:FC<RegisterComponentProps>=(props)=>{
         }
         return data;
     }
-    
     return( 
     <div id="registerModal">
     <div id="registerPanel">

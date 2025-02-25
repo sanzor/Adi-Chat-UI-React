@@ -7,7 +7,7 @@ import { GetUserSubscriptionsResult } from "../Dtos/GetUserSubscriptionsResult";
 import config from "../Config";
 import { useUser } from "./UserContext";
 import { User } from "../Domain/User";
-import { ADD_CHANNEL, GET_NEWEST_MESSAGES_FOR_USER_COMMAND, GET_NEWEST_MESSAGES_FOR_USER_COMMAND_RESULT, REMOVE_CHANNEL } from "../Events";
+import { ADD_CHANNEL_DOM, GET_NEWEST_MESSAGES_FOR_USER_COMMAND, GET_NEWEST_MESSAGES_FOR_USER_COMMAND_RESULT, REMOVE_CHANNEL } from "../Events";
 import { GetNewestMessagesForUserCommand } from "../Domain/Commands/GetNewestMessagesForUserCommand";
 import { useWebSocket } from "./WebsocketContext";
 import { GetNewestMessagesForUserCommandResultDto } from "../Dtos/SocketCommandResults/GetNewestMessagesForUserResultDto";
@@ -58,7 +58,9 @@ export const ChannelsProvider:React.FC<{children:ReactNode}>=({children})=>{
         const storedMessagesMap = getItemFromStorage<Map<number, ChannelWithMessagesDto>>(MESSAGES);
         return storedMessagesMap ? storedMessagesMap : new Map();
     });
-    
+    useEffect(()=>{
+      fetchChannels();
+    },[]);
     useEffect(()=>{
         setItemInStorage(CHANNELS,channels);
         console.log(channels);
@@ -71,8 +73,9 @@ export const ChannelsProvider:React.FC<{children:ReactNode}>=({children})=>{
     useEffect(()=>{
       const handleGetNewestMessagesForUser=(ev:CustomEvent)=>{
           var topicsWithChannels:GetNewestMessagesForUserCommandResultDto=ev.detail;
+          console.log(topicsWithChannels);
           const map = new Map<number, ChannelWithMessagesDto>(
-            topicsWithChannels.channels_with_messages.map(item => [item.channel.id, item])
+            (topicsWithChannels.channels_with_messages ?? []).map(item => [item.channel.id, item])
           );
           setMessagesMap(map);
       };
@@ -92,6 +95,7 @@ export const ChannelsProvider:React.FC<{children:ReactNode}>=({children})=>{
     },[]);
     useEffect(() => {
         const handleAddChannel = (channel: Channel) => {
+          
           // Use the latest channelsRef value to check for duplicates
           if (!channels.find((c) => c.id === channel.id)) {
             const newChannelList = [...channels, channel];
@@ -101,10 +105,10 @@ export const ChannelsProvider:React.FC<{children:ReactNode}>=({children})=>{
         const handleRemoveChannel = (channelId: number) => {
             setChannels((prev) => prev.filter((c) => c.id !== channelId));
         };
-        eventBus.subscribe(ADD_CHANNEL, handleAddChannel);
+        eventBus.subscribe(ADD_CHANNEL_DOM, handleAddChannel);
         eventBus.subscribe(REMOVE_CHANNEL,handleRemoveChannel);
         return () => {
-          eventBus.unsubscribe(ADD_CHANNEL, handleAddChannel);
+          eventBus.unsubscribe(ADD_CHANNEL_DOM, handleAddChannel);
           eventBus.unsubscribe(REMOVE_CHANNEL,handleRemoveChannel);
         };
       }, [eventBus]); 
@@ -124,7 +128,15 @@ export const ChannelsProvider:React.FC<{children:ReactNode}>=({children})=>{
         }
       };
 
-    return (<ChannelsContext.Provider value={{channels,setChannels,currentChannel:currentChannel,setCurrentChannel,messagesMap,setMessagesMap,updateMessageForChannel}}>{children}</ChannelsContext.Provider>);
+    return (<ChannelsContext.Provider value={{
+      channels,
+      setChannels,
+      currentChannel:currentChannel,
+      setCurrentChannel,
+      messagesMap,
+      setMessagesMap,
+      updateMessageForChannel}
+    }>{children}</ChannelsContext.Provider>);
 };
 
 export const useChannels=()=>{

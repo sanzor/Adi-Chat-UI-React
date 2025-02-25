@@ -7,4 +7,5 @@ export interface SubscribeCommandResultDto extends BaseCommandResultDto{
     command: typeof SUBSCRIBE_COMMAND_RESULT;
     topic?:SubscriptionDto;
     result:string;
+    subscriptions:SubscriptionDto[]
 }

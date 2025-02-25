@@ -29,9 +29,15 @@ const ChannelsComponent:React.FC<ChannelsComponentProps>=({
         console.log(`Triggering unsubscribe for channel:${channel}`);
         handleUnsubscribe(channel);
     };
+    const handleRemoveAll=()=>{
+        channels?.map(chan=>{
+            handleUnsubscribe(chan);
+        });
+    }
     return(
     <>
        <div id="channelsPanel">
+                  <button onClick={handleRemoveAll}>Remove all</button>
                   <label id="channelsLabel">Channels</label>
                   <div id="channelsAreaPanel">
                           <div id="channelsContainer" className="chatScroll">

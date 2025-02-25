@@ -5,7 +5,7 @@ import ChatSendComponent from "./ChatSendComponent";
 import '../css/specific.css';
 import '../css/general.css';
 import { SubscribeCommandResultDto } from "../Dtos/SocketCommandResults/SubscribeCommandResultDto";
-import { ADD_CHANNEL, GET_NEWEST_MESSAGES_COMMAND_RESULT, NEW_INCOMING_MESSAGE, PUBLISH_MESSAGE_COMMAND, REFRESH_CHANNELS_COMMAND_RESULT, REMOVE_CHANNEL, RESET_CHAT, SET_CHAT, SOCKET_CLOSED, SUBSCRIBE_COMMAND, SUBSCRIBE_COMMAND_RESULT_COMPONENT, UNSUBSCRIBE_COMMAND, UNSUBSCRIBE_COMMAND_RESULT } from "../Events";
+import { ADD_CHANNEL_DOM, GET_NEWEST_MESSAGES_COMMAND_RESULT, NEW_INCOMING_MESSAGE, PUBLISH_MESSAGE_COMMAND, REFRESH_CHANNELS_COMMAND_RESULT, REMOVE_CHANNEL, RESET_CHAT, SET_CHAT, SOCKET_CLOSED, SUBSCRIBE_COMMAND, SUBSCRIBE_COMMAND_RESULT_COMPONENT, UNSUBSCRIBE_COMMAND, UNSUBSCRIBE_COMMAND_RESULT } from "../Events";
 import { useEventBus } from "../Providers/EventBusContext";
 import { MESSAGES, TOPIC_ID } from "../Constants";
 import { SubscribeCommand } from "../Domain/Commands/SubscribeCommand";
@@ -134,7 +134,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
           const updatedChannels = [...channels!, targetChannel];
           console.log(updatedChannels);
           setChannels(updatedChannels);
-          eventBus.publishEvent(ADD_CHANNEL, targetChannel);
+          eventBus.publishEvent(ADD_CHANNEL_DOM, targetChannel);
       
           // Set the current channel if no current channel is set
           if (!currentChannel || !channels?.find((channel) => channel.id === currentChannel.id)) {
@@ -197,25 +197,25 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
       
         // Remove the channel from the list
         
-        setChannels((prevChannels: Channel[]) => {
-          const updatedChannels = prevChannels.filter((channel) => channel.id !== unsubscribeResult.topicId);
-      
+        setChannels((_: Channel[]) => {
+          
+         
           // If there are no channels left, reset the chat
-          if (updatedChannels.length === 0) {
+          if (unsubscribeResult.subscriptions.length=== 0) {
             eventBus.publishEvent(RESET_CHAT, {});
             return [];
           }
       
           // Update the current channel if necessary
           if (currentChannel && currentChannel.id === unsubscribeResult.topicId) {
-            setCurrentChannel(updatedChannels[0]); // Set to the first channel in the updated list
-            eventBus.publishEvent(SET_CHAT, updatedChannels[0]);
+            setCurrentChannel(unsubscribeResult.subscriptions[0]); // Set to the first channel in the updated list
+            eventBus.publishEvent(SET_CHAT, unsubscribeResult.subscriptions[0]);
           }
       
           eventBus.publishEvent(REMOVE_CHANNEL, { [TOPIC_ID]: unsubscribeResult.topicId });
           console.log("Channel removed:", unsubscribeResult.topicId);
       
-          return updatedChannels;
+          return unsubscribeResult.subscriptions;
         });
       };
     const handleChatSend=(newMessage:PublishMessageParams)=>{

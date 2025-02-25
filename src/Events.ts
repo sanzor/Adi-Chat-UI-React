@@ -36,7 +36,7 @@ const RESET_CHAT_DOM:string="reset_chat_dom";
 
 const SET_CHANNELS:string="set_channels";
 const REMOVE_CHANNEL:string="remove_channel";
-const ADD_CHANNEL:string="add_channel";
+const ADD_CHANNEL_DOM:string="add_channel_dom";
 
 const SHOW_MAIN:string="showMain";
 const HIDE_MAIN:string="hideMain";
@@ -53,7 +53,7 @@ export {
     REFRESH_CHANNELS_COMMAND_RESULT,
     DISCONNECT_COMMAND,
     SET_CHANNELS,
-    ADD_CHANNEL,
+    ADD_CHANNEL_DOM,
     REMOVE_CHANNEL,
     
     CHANNEL_CLICK,

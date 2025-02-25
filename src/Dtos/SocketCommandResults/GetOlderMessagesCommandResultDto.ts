@@ -4,5 +4,5 @@ import { ChatMessageDto } from "./ChatMessageDto";
 
 export interface GetOlderMessagesCommandResultDto extends BaseCommandResultDto{
     command: typeof GET_OLDER_MESSAGES_COMMAND;
-    result:[ChatMessageDto]
+    result:ChatMessageDto[]
 };

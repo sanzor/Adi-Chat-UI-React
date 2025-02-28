@@ -50,7 +50,7 @@ export class MessageService {
 
   private handleChatMessage(data: any) {
     console.log("New chat message received:", data);
-    this.eventBus.publishEvent(NEW_INCOMING_MESSAGE, data.detail);
+    this.eventBus.publishEvent(NEW_INCOMING_MESSAGE, data);
   }
 
   private handleCommandResult(data: any) {

@@ -12,7 +12,8 @@ const ChannelComponent:React.FC<ChannelComponentProps>=({channel,onUnsubscribe,o
     };
     const handleOpenChat=function(){
         onOpenChat(channel);
-    }
+    };
+    console.log(channel);
     return (
     <>
     <span className="channelRow" data-channel={JSON.stringify(channel)}>

@@ -38,7 +38,6 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
       // s
       useEffect(()=>{
         const handleNewMessage=(event:CustomEvent)=>{
-          console.log(event);
           const newMessage:ChatMessage=event.detail as ChatMessage;
           console.log(newMessage);
           setMessagesByChannel(prev=>{

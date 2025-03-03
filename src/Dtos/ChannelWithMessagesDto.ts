@@ -1,7 +1,7 @@
 import { Channel } from "../Domain/Channel";
-import { ChatMessageDto } from "./SocketCommandResults/ChatMessageDto";
+import { ChatMessage } from "../Domain/ChatMessage";
 
 export interface ChannelWithMessagesDto{
     channel:Channel;
-    messages:[ChatMessageDto];
+    messages:[ChatMessage];
 }

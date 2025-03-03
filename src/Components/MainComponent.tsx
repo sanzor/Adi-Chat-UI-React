@@ -11,13 +11,14 @@ import { MESSAGES, TOPIC_ID } from "../Constants";
 import { SubscribeCommand } from "../Domain/Commands/SubscribeCommand";
 import { getItemFromStorage, setItemInStorage } from "../Utils";
 import { Channel } from "../Domain/Channel";
-import { UnsubscribeCommandResultDto } from "../Dtos/SocketCommandResults/UnsubscrirbeCommandResultDto";
+import { UnsubscribeCommandResultDto } from "../Dtos/SocketCommandResults/UnsubscribeCommandResultDto";
 import { UnsubscribeCommand } from "../Domain/Commands/UnsubscribeCommand";
 import { GetNewestMessagesResult } from "../Dtos/GetNewestMessagesResult";
 import { ChatMessage } from "../Domain/ChatMessage";
 import { PublishMessageCommand } from "../Domain/Commands/PublishMessageCommand";
 import { PublishMessageParams } from "../Dtos/PublishMessageParams";
 import { useChannels } from "../Providers/ChannelContext";
+import { ChatProvider } from "../Providers/ChatProvider";
 export interface MainComponentProps{
     onLogout:()=>void;
 }
@@ -234,7 +235,11 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
         </div> 
         <ChannelsComponent handleUnsubscribe={handleUnsubscribe}/>
         <ChatComponent currentChannel={currentChannel} messages={messagesByChannel[currentChannel?.id??""]}></ChatComponent>
-        <ChatSendComponent handleChatSend={handleChatSend}></ChatSendComponent>
+        <ChatProvider>
+            <ChatSendComponent handleChatSend={handleChatSend}>
+            </ChatSendComponent>
+        </ChatProvider>
+        
     </div>
     {/* </div> */}
     </>

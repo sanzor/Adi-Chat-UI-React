@@ -48,8 +48,8 @@ export const ChatProvider:React.FC<{children:ReactNode}>=({children})=>{
     eventBus.subscribe(NEW_INCOMING_MESSAGE,handleNewIncomingMessage);
     eventBus.subscribe(NEW_MESSAGE_PUBLISHED,handleMessagePublished);
     return ()=>{
-            eventBus.unsubscribe(NEW_INCOMING_MESSAGE,handleNewIncomingMessage);
-            eventBus.unsubscribe(NEW_MESSAGE_PUBLISHED,handleMessagePublished);
+        eventBus.unsubscribe(NEW_INCOMING_MESSAGE,handleNewIncomingMessage);
+        eventBus.unsubscribe(NEW_MESSAGE_PUBLISHED,handleMessagePublished);
      }
     },[eventBus]);
     const publishMessage=(newMessage:PublishMessageParams)=>{

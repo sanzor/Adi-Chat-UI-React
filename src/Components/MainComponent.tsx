@@ -5,7 +5,11 @@ import ChatSendComponent from "./ChatSendComponent";
 import '../css/specific.css';
 import '../css/general.css';
 import { SubscribeCommandResultDto } from "../Dtos/SocketCommandResults/SubscribeCommandResultDto";
-import { ADD_CHANNEL_DOM, GET_NEWEST_MESSAGES_COMMAND_RESULT, NEW_INCOMING_MESSAGE, PUBLISH_MESSAGE_COMMAND, REFRESH_CHANNELS_COMMAND_RESULT, REMOVE_CHANNEL, RESET_CHAT, SET_CHAT, SOCKET_CLOSED, SUBSCRIBE_COMMAND, SUBSCRIBE_COMMAND_RESULT_COMPONENT, UNSUBSCRIBE_COMMAND, UNSUBSCRIBE_COMMAND_RESULT } from "../Events";
+import { ADD_CHANNEL_DOM,
+   GET_NEWEST_MESSAGES_COMMAND_RESULT, 
+   NEW_INCOMING_MESSAGE,
+   PUBLISH_MESSAGE_COMMAND,
+   REFRESH_CHANNELS_COMMAND_RESULT, REMOVE_CHANNEL, RESET_CHAT, SET_CHAT, SOCKET_CLOSED, SUBSCRIBE_COMMAND, SUBSCRIBE_COMMAND_RESULT_COMPONENT, UNSUBSCRIBE_COMMAND, UNSUBSCRIBE_COMMAND_RESULT } from "../Events";
 import { useEventBus } from "../Providers/EventBusContext";
 import { MESSAGES, TOPIC_ID } from "../Constants";
 import { SubscribeCommand } from "../Domain/Commands/SubscribeCommand";
@@ -19,6 +23,7 @@ import { PublishMessageCommand } from "../Domain/Commands/PublishMessageCommand"
 import { PublishMessageParams } from "../Dtos/PublishMessageParams";
 import { useChannels } from "../Providers/ChannelContext";
 import { ChatProvider } from "../Providers/ChatProvider";
+import { NewMessageDto } from "../Dtos/NewMessageDto";
 export interface MainComponentProps{
     onLogout:()=>void;
 }
@@ -39,7 +44,8 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
       // s
       useEffect(()=>{
         const handleNewMessage=(event:CustomEvent)=>{
-          const newMessage:ChatMessage=event.detail as ChatMessage;
+          const newMessageDto:NewMessageDto=event.detail as NewMessageDto;
+          const newMessage=newMessageDto.message;
           console.log(newMessage);
           setMessagesByChannel(prev=>{
              const updatedMessages={
@@ -233,11 +239,10 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
             <label id="subscribeLabel" className="subscribeLabel" >Channel</label>
             <button id="subscribeBtn" className="subscribeButton" onClick={handleSubscribe}>Subscribe</button>
         </div> 
-        <ChannelsComponent handleUnsubscribe={handleUnsubscribe}/>
-        <ChatComponent currentChannel={currentChannel} messages={messagesByChannel[currentChannel?.id??""]}></ChatComponent>
         <ChatProvider>
-            <ChatSendComponent handleChatSend={handleChatSend}>
-            </ChatSendComponent>
+          <ChannelsComponent handleUnsubscribe={handleUnsubscribe}/>
+          <ChatComponent currentChannel={currentChannel} messages={messagesByChannel[currentChannel?.id??""]}></ChatComponent>
+          <ChatSendComponent handleChatSend={handleChatSend}></ChatSendComponent>
         </ChatProvider>
         
     </div>

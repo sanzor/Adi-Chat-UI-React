@@ -19,7 +19,10 @@ import {
     RESET_CHAT,
     SUBSCRIBE_COMMAND_RESULT_COMPONENT,
     GET_NEWEST_MESSAGES_FOR_USER_COMMAND,
-    GET_NEWEST_MESSAGES_FOR_USER_COMMAND_RESULT
+    GET_NEWEST_MESSAGES_FOR_USER_COMMAND_RESULT,
+    NEW_MESSAGE,
+    MESSAGE_PUBLISHED,
+    NEW_MESSAGE_PUBLISHED
 } from "../Events";
 
 export class MessageService {
@@ -50,7 +53,17 @@ export class MessageService {
 
   private handleChatMessage(data: any) {
     console.log("New chat message received:", data);
-    this.eventBus.publishEvent(NEW_INCOMING_MESSAGE, data);
+    switch(data.type){
+       case NEW_MESSAGE:
+          this.eventBus.publishEvent(NEW_INCOMING_MESSAGE, data);
+          break;
+        case MESSAGE_PUBLISHED:
+          this.eventBus.publishEvent(NEW_MESSAGE_PUBLISHED,data);
+          break;
+        default:
+          console.warn("Unknown chat message:",data);
+    }
+   
   }
 
   private handleCommandResult(data: any) {

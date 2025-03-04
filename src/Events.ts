@@ -27,7 +27,9 @@ const SUBSCRIBE_COMMAND_RESULT_U:string="subscribe_result_u";
 const SOCKET_RECEIVE:string="socketReceive";
 const SOCKET_CLOSED:string="socketClosed";
 
-
+const NEW_MESSAGE="new_message";
+const MESSAGE_PUBLISHED="message_published";
+const NEW_MESSAGE_PUBLISHED="new_message_published";
 const NEW_INCOMING_MESSAGE:string="new_channel_message";
 const SET_CHAT:string="set_chat";
 const SET_CHAT_DOM:string="set_chat_dom";
@@ -74,6 +76,9 @@ export {
     RESET_CHAT,
     RESET_CHAT_DOM,
     NEW_INCOMING_MESSAGE,
+    NEW_MESSAGE,
+    MESSAGE_PUBLISHED,
+    NEW_MESSAGE_PUBLISHED,
 
     PUBLISH_MESSAGE_COMMAND,
     SELF_PUBLISH_MESSAGE_COMMAND,

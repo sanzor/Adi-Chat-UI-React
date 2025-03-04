@@ -11,7 +11,7 @@ interface ChatSendComponentProps{
 
 const ChatSendComponent:React.FC<ChatSendComponentProps>=(props)=>{
     let {user}=useUser();
-    const {currentChannel}=useChannels();
+    const {currentChannel,setMessagesMap}=useChannels();
     const [messageText,setMessageText]=useState<string>("");
     const {publishMessage}=useChat();
     const onChatSendClick=()=>{

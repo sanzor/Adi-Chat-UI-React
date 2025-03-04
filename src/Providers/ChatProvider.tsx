@@ -1,10 +1,10 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { useEventBus } from "./EventBusContext";
-import { ChatMessage } from "../Domain/ChatMessage";
-import { NEW_INCOMING_MESSAGE, PUBLISH_MESSAGE_COMMAND } from "../Events";
+import { ChatMessage, SENDING, SENT } from "../Domain/ChatMessage";
+import { NEW_INCOMING_MESSAGE, NEW_MESSAGE_PUBLISHED, PUBLISH_MESSAGE_COMMAND } from "../Events";
 import { PublishMessageParams } from "../Dtos/PublishMessageParams";
 import { PublishMessageCommand } from "../Domain/Commands/PublishMessageCommand";
-
+import { v4 as uuidv4 } from 'uuid';
 interface ChatContextType{
     messagesMap: Map<number, ChatMessage[]> | null;
     publishMessage: (message:PublishMessageParams) => void;
@@ -18,24 +18,58 @@ export const ChatProvider:React.FC<{children:ReactNode}>=({children})=>{
     const eventBus = useEventBus();
 
     useEffect(()=>{
-      const handleNewMessage = (event: CustomEvent) => {
-        const newMessage: ChatMessage = event.detail as ChatMessage;
+      const handleNewIncomingMessage = (event: CustomEvent) => {
+        var newMessage: ChatMessage = event.detail as ChatMessage;
         console.log(newMessage);
         setMessagesMap(prev => {
             if (!prev) return new Map([[newMessage.topicId, [newMessage]]]); // Handle initial state
             const updatedMessages = new Map(prev); // Clone the existing Map
             const existingMessages = updatedMessages.get(newMessage.topicId) || [];
-            updatedMessages.set(newMessage.topicId, [...existingMessages, newMessage]); // Append new message
+            updatedMessages.set(newMessage.topicId,[...existingMessages,newMessage]);
             return updatedMessages;
         });
       };
+      const handleMessagePublished=(event:CustomEvent)=>{
+          var publishedMessage: ChatMessage = event.detail as ChatMessage;
+          console.log(publishedMessage);
+          setMessagesMap(prev => {
+            if (!prev) return new Map([[publishedMessage.topicId, [publishedMessage]]]); // Handle initial state
+            const updatedMessages = new Map(prev); // Clone the existing Map
+            const existingMessages = updatedMessages.get(publishedMessage.topicId) || [];
+            const messageIndex=existingMessages.findIndex(msg=>msg.tempId==publishedMessage.tempId);
+            if(messageIndex==-1){
+               throw new Error("Published message should exist");  
+            };
+            existingMessages[messageIndex]={...existingMessages[messageIndex],status:SENT,id:publishedMessage.id,created_at:publishedMessage.created_at}
+            return updatedMessages;
+        });
 
-    eventBus.subscribe(NEW_INCOMING_MESSAGE,handleNewMessage);
+      };
+    eventBus.subscribe(NEW_INCOMING_MESSAGE,handleNewIncomingMessage);
+    eventBus.subscribe(NEW_MESSAGE_PUBLISHED,handleMessagePublished);
     return ()=>{
-            eventBus.unsubscribe(NEW_INCOMING_MESSAGE,handleNewMessage);
+            eventBus.unsubscribe(NEW_INCOMING_MESSAGE,handleNewIncomingMessage);
+            eventBus.unsubscribe(NEW_MESSAGE_PUBLISHED,handleMessagePublished);
      }
     },[eventBus]);
     const publishMessage=(newMessage:PublishMessageParams)=>{
+        var sentMessage:ChatMessage={
+          id:null,
+          message:newMessage.message,
+          tempId:uuidv4(),
+          userId:newMessage.userId,
+          topicId:newMessage.topicId,
+          status:SENDING,
+        created_at:null};
+
+        setMessagesMap(prev => {
+            if (!prev) return new Map([[sentMessage.topicId, [sentMessage]]]); // Handle initial state
+            const updatedMessages = new Map(prev); // Clone the existing Map
+            const existingMessages = updatedMessages.get(sentMessage.topicId) || [];
+            updatedMessages.set(sentMessage.topicId, [...existingMessages, sentMessage]); // Append new message
+            return updatedMessages;
+        });
+      
         eventBus.publishCommand({message:newMessage,kind:PUBLISH_MESSAGE_COMMAND} as PublishMessageCommand)
     };
     const clearUnreadMessagesForChannel = (channelId: number): number => {
@@ -53,7 +87,7 @@ export const ChatProvider:React.FC<{children:ReactNode}>=({children})=>{
   
       return messagesMap.get(channelId)?.length || 0; // Return the number of cleared messages
     };
-    
+
       return (
         <ChatContext.Provider value={{ messagesMap, publishMessage ,clearUnreadMessagesForChannel}}>
           {children}

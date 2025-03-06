@@ -4,6 +4,7 @@ const REFRESH_CHANNELS_COMMAND:string="get_subscriptions";
 const SUBSCRIBE_COMMAND:string="subscribe";
 const UNSUBSCRIBE_COMMAND:string="unsubscribe";
 const PUBLISH_MESSAGE_COMMAND:string="publish";
+const AKNOWLEDGE_MESSAGE_COMMAND:string="acknowledge";
 const SELF_PUBLISH_MESSAGE_COMMAND:string="self_publish";
 const GET_OLDER_MESSAGES_COMMAND:string="get_older_messages";
 const GET_OLDER_MESSAGES_COMMAND_RESULT:string="get_older_messages_result";
@@ -79,7 +80,7 @@ export {
     NEW_MESSAGE,
     MESSAGE_PUBLISHED,
     NEW_MESSAGE_PUBLISHED,
-
+    AKNOWLEDGE_MESSAGE_COMMAND,
     PUBLISH_MESSAGE_COMMAND,
     SELF_PUBLISH_MESSAGE_COMMAND,
     GET_OLDER_MESSAGES_COMMAND,

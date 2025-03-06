@@ -1,10 +1,12 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { useEventBus } from "./EventBusContext";
 import { ChatMessage, SENDING, SENT } from "../Domain/ChatMessage";
-import { NEW_INCOMING_MESSAGE, NEW_MESSAGE_PUBLISHED, PUBLISH_MESSAGE_COMMAND } from "../Events";
+import { AKNOWLEDGE_MESSAGE_COMMAND, NEW_INCOMING_MESSAGE, NEW_MESSAGE_PUBLISHED, PUBLISH_MESSAGE_COMMAND } from "../Events";
 import { PublishMessageParams } from "../Dtos/PublishMessageParams";
 import { PublishMessageCommand } from "../Domain/Commands/PublishMessageCommand";
 import { v4 as uuidv4 } from 'uuid';
+import { AcknowledgeMessageCommand } from "../Domain/Commands/AcknowledgeMessageCommand";
+import { AcknowledgeMessageParams } from "../Dtos/AcknowledgeMessageParams";
 interface ChatContextType{
     messagesMap: Map<number, ChatMessage[]> | null;
     publishMessage: (message:PublishMessageParams) => void;
@@ -31,18 +33,26 @@ export const ChatProvider:React.FC<{children:ReactNode}>=({children})=>{
       };
       const handleMessagePublished=(event:CustomEvent)=>{
           var publishedMessage: ChatMessage = event.detail as ChatMessage;
+          
           console.log(publishedMessage);
           setMessagesMap(prev => {
             if (!prev) return new Map([[publishedMessage.topicId, [publishedMessage]]]); // Handle initial state
             const updatedMessages = new Map(prev); // Clone the existing Map
             const existingMessages = updatedMessages.get(publishedMessage.topicId) || [];
             const messageIndex=existingMessages.findIndex(msg=>msg.tempId==publishedMessage.tempId);
-            if(messageIndex==-1){
+            if(messageIndex===-1){
                throw new Error("Published message should exist");  
             };
-            existingMessages[messageIndex]={...existingMessages[messageIndex],status:SENT,id:publishedMessage.id,created_at:publishedMessage.created_at}
+            existingMessages[messageIndex]={...existingMessages[messageIndex],status:SENT,id:publishedMessage.id,created_at:publishedMessage.created_at};
             return updatedMessages;
-        });
+          });
+          eventBus.publishCommand({
+            kind:AKNOWLEDGE_MESSAGE_COMMAND,
+            params: {
+              tempId:publishedMessage.tempId,
+              userId:publishedMessage.userId
+            } as AcknowledgeMessageParams
+          } as AcknowledgeMessageCommand);
 
       };
     eventBus.subscribe(NEW_INCOMING_MESSAGE,handleNewIncomingMessage);
@@ -72,6 +82,7 @@ export const ChatProvider:React.FC<{children:ReactNode}>=({children})=>{
       
         eventBus.publishCommand({message:newMessage,kind:PUBLISH_MESSAGE_COMMAND} as PublishMessageCommand)
     };
+
     const clearUnreadMessagesForChannel = (channelId: number): number => {
       if (!messagesMap) return 0;
   

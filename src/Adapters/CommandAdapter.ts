@@ -7,7 +7,7 @@ import { PublishMessageCommand } from "../Domain/Commands/PublishMessageCommand"
 import { GetSubscripttionsCommand } from "../Domain/Commands/RefreshChannelsCommand";
 import { SubscribeCommand } from "../Domain/Commands/SubscribeCommand";
 import { UnsubscribeCommand } from "../Domain/Commands/UnsubscribeCommand";
-import { DISCONNECT_COMMAND,
+import { AKNOWLEDGE_MESSAGE_COMMAND, DISCONNECT_COMMAND,
         GET_NEWEST_MESSAGES_COMMAND,
         GET_NEWEST_MESSAGES_FOR_USER_COMMAND,
         GET_OLDER_MESSAGES_COMMAND,
@@ -25,6 +25,8 @@ import { GetNewestMessagesCommandDto } from "../Dtos/SocketCommands/GetNewestMes
 import { GetOlderMessagesDto as GetOlderMessagesCommandDto } from "../Dtos/SocketCommands/GetOlderMessagesDto";
 import { GetNewestMessagesForUserCommand } from "../Domain/Commands/GetNewestMessagesForUserCommand";
 import { GetNewestMessagesForUserCommandDto } from "../Dtos/SocketCommands/GetNewestMessagesForUserCommandDto";
+import { AcknowledgeMessageCommandDto } from "../Dtos/SocketCommands/AcknowledgeMessageCommandDto";
+import { AcknowledgeMessageCommand } from "../Domain/Commands/AcknowledgeMessageCommand";
 
 
 export function createSocketCommand(data:Command):BaseCommandDto|null{
@@ -47,11 +49,16 @@ function innerCreateCommand(data:Command): BaseCommandDto|null{
             break;
         case PUBLISH_MESSAGE_COMMAND :
             if(isPublishMessage(data))
-                return create_command_publish(data as PublishMessageCommand);
+                return command_publish_message(data as PublishMessageCommand);
+            break;
+        case AKNOWLEDGE_MESSAGE_COMMAND:
+            if(isAcknowledgeMessageCommand(data)){
+                return command_acknowledge_message(data as AcknowledgeMessageCommand);
+            }   
             break;
         case DISCONNECT_COMMAND:
             if(isDisconnectCommand(data))
-                return command_disconnect();
+                return create_command_disconnect();
             break;
         case  GET_NEWEST_MESSAGES_COMMAND: 
             if(isGetNewestMessagesCommand(data)){
@@ -101,19 +108,29 @@ function create_command_get_subscriptions():GetSubscriptionsCommandDto{
     return message;
     
 }
-function command_disconnect():DisconnectCommandDto{
+function create_command_disconnect():DisconnectCommandDto{
     var  message:DisconnectCommandDto={
         command:DISCONNECT_COMMAND
     }
     return message;
 }
 
-function create_command_publish(command:PublishMessageCommand):PublishCommandDto{
+function command_publish_message(command:PublishMessageCommand):PublishCommandDto{
    
     var toSend:PublishCommandDto={
         command:PUBLISH_MESSAGE_COMMAND,
         topicId:command.message.topicId,
         content:command.message.message
+    };
+    return toSend;
+}
+
+function command_acknowledge_message(command:AcknowledgeMessageCommand):AcknowledgeMessageCommandDto{
+   
+    var toSend:AcknowledgeMessageCommandDto={
+        command:AKNOWLEDGE_MESSAGE_COMMAND,
+        user_id:command.params.userId,
+        message_temp_id:command.params.tempId
     };
     return toSend;
 }
@@ -162,7 +179,9 @@ function isRefreshChannelsCommand(command: Command): command is GetSubscripttion
 function isPublishMessage(command: Command): command is PublishMessageCommand {
     return command.kind === PUBLISH_MESSAGE_COMMAND;
 }
-
+function isAcknowledgeMessageCommand(command: Command): command is AcknowledgeMessageCommand {
+    return command.kind === PUBLISH_MESSAGE_COMMAND;
+}
 function isDisconnectCommand(command: Command): command is DisconnectCommand {
     return command.kind === DISCONNECT_COMMAND;
 }

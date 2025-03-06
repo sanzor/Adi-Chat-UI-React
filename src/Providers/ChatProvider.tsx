@@ -33,26 +33,26 @@ export const ChatProvider:React.FC<{children:ReactNode}>=({children})=>{
       };
       const handleMessagePublished=(event:CustomEvent)=>{
           var publishedMessage: ChatMessage = event.detail as ChatMessage;
-          
+          console.log("Inside handle for incoming published message ");
           console.log(publishedMessage);
           setMessagesMap(prev => {
             if (!prev) return new Map([[publishedMessage.topicId, [publishedMessage]]]); // Handle initial state
             const updatedMessages = new Map(prev); // Clone the existing Map
             const existingMessages = updatedMessages.get(publishedMessage.topicId) || [];
-            const messageIndex=existingMessages.findIndex(msg=>msg.tempId==publishedMessage.tempId);
+            const messageIndex=existingMessages.findIndex(msg=>msg.tempId===publishedMessage.tempId);
             if(messageIndex===-1){
                throw new Error("Published message should exist");  
             };
-            existingMessages[messageIndex]={...existingMessages[messageIndex],status:SENT,id:publishedMessage.id,created_at:publishedMessage.created_at};
+            existingMessages[messageIndex]={...existingMessages[messageIndex],status:publishedMessage.status,id:publishedMessage.id,created_at:publishedMessage.created_at};
             return updatedMessages;
           });
-          eventBus.publishCommand({
+          let ackCommand:AcknowledgeMessageCommand={
             kind:AKNOWLEDGE_MESSAGE_COMMAND,
             params: {
               tempId:publishedMessage.tempId,
               userId:publishedMessage.userId
-            } as AcknowledgeMessageParams
-          } as AcknowledgeMessageCommand);
+            } as AcknowledgeMessageParams};
+          eventBus.publishCommand(ackCommand);
 
       };
     eventBus.subscribe(NEW_INCOMING_MESSAGE,handleNewIncomingMessage);

@@ -119,8 +119,11 @@ function command_publish_message(command:PublishMessageCommand):PublishCommandDt
    
     var toSend:PublishCommandDto={
         command:PUBLISH_MESSAGE_COMMAND,
+        tempId:command.message.tempId,
         topicId:command.message.topicId,
-        content:command.message.message
+        content:command.message.message,
+        userId:command.message.userId,
+
     };
     return toSend;
 }

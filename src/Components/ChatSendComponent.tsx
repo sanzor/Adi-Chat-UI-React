@@ -11,11 +11,12 @@ interface ChatSendComponentProps{
 
 const ChatSendComponent:React.FC<ChatSendComponentProps>=(props)=>{
     let {user}=useUser();
-    const {currentChannel,setMessagesMap}=useChannels();
+    const {currentChannel}=useChannels();
     const [messageText,setMessageText]=useState<string>("");
     const {publishMessage}=useChat();
     const onChatSendClick=()=>{
-        let msg:PublishMessageParams={message:messageText,topicId:currentChannel!.id,userId:user!.id};
+        const tempId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        let msg:PublishMessageParams={message:messageText,tempId:tempId,topicId:currentChannel!.id,userId:user!.id};
         publishMessage(msg);
     };
     return (

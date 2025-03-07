@@ -125,8 +125,10 @@ export class WebSocketController {
 
   private handleSocketCommand = (event: CustomEvent): void => {
     const command: Command = event.detail;
+    console.log(event.detail);
     const payload = JSON.stringify(createSocketCommand(command));
 
+    console.log(payload);
     if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
       console.warn("WebSocketController: WebSocket is not connected. Queuing message:", payload);
       this.messageQueue.push(payload); // Queue the message

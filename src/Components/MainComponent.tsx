@@ -175,7 +175,7 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
             eventBus.subscribe(UNSUBSCRIBE_COMMAND_RESULT, onUnsubscribeResult);
             let command={
               kind: UNSUBSCRIBE_COMMAND,
-              topicId: Number(channel.id),
+              topic_id: Number(channel.id),
             } as UnsubscribeCommand
             // Publish the UNSUBSCRIBE command
             eventBus.publishCommand(command);

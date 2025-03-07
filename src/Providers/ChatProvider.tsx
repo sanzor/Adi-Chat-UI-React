@@ -1,12 +1,12 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { useEventBus } from "./EventBusContext";
-import { ChatMessage, SENDING, SENT } from "../Domain/ChatMessage";
+import { ChatMessage, SENDING } from "../Domain/ChatMessage";
 import { AKNOWLEDGE_MESSAGE_COMMAND, NEW_INCOMING_MESSAGE, NEW_MESSAGE_PUBLISHED, PUBLISH_MESSAGE_COMMAND } from "../Events";
 import { PublishMessageParams } from "../Dtos/PublishMessageParams";
 import { PublishMessageCommand } from "../Domain/Commands/PublishMessageCommand";
 import { v4 as uuidv4 } from 'uuid';
 import { AcknowledgeMessageCommand } from "../Domain/Commands/AcknowledgeMessageCommand";
-import { AcknowledgeMessageParams } from "../Dtos/AcknowledgeMessageParams";
+import { ChatMessageDto } from "../Dtos/ChatMessageDto";
 interface ChatContextType{
     messagesMap: Map<number, ChatMessage[]> | null;
     publishMessage: (message:PublishMessageParams) => void;
@@ -18,10 +18,21 @@ const ChatContext=createContext<ChatContextType|undefined>(undefined);
 export const ChatProvider:React.FC<{children:ReactNode}>=({children})=>{
     const [messagesMap, setMessagesMap] = useState<Map<number, ChatMessage[]> | null>(new Map());
     const eventBus = useEventBus();
-
+    const toChatMessage=(messageDto:ChatMessageDto):ChatMessage=>{
+       let chatMessage={
+        tempId:messageDto.temp_id,
+        created_at:messageDto.created_at,
+        id:messageDto.id,
+        message:messageDto.message,
+        status:messageDto.status,
+        topicId:messageDto.topic_id,
+        userId:messageDto.user_id
+      }
+      return chatMessage;
+    }
     useEffect(()=>{
       const handleNewIncomingMessage = (event: CustomEvent) => {
-        var newMessage: ChatMessage = event.detail as ChatMessage;
+        var newMessage: ChatMessage = toChatMessage(event.detail as ChatMessageDto);
         console.log(newMessage);
         setMessagesMap(prev => {
             if (!prev) return new Map([[newMessage.topicId, [newMessage]]]); // Handle initial state
@@ -32,7 +43,7 @@ export const ChatProvider:React.FC<{children:ReactNode}>=({children})=>{
         });
       };
       const handleMessagePublished=(event:CustomEvent)=>{
-          var publishedMessage: ChatMessage = event.detail as ChatMessage;
+          var publishedMessage: ChatMessage = toChatMessage(event.detail as ChatMessageDto);
           console.log("Inside handle for incoming published message ");
           console.log(publishedMessage);
           setMessagesMap(prev => {
@@ -47,11 +58,11 @@ export const ChatProvider:React.FC<{children:ReactNode}>=({children})=>{
             return updatedMessages;
           });
           let ackCommand:AcknowledgeMessageCommand={
-            kind:AKNOWLEDGE_MESSAGE_COMMAND,
-            params: {
-              tempId:publishedMessage.tempId,
-              userId:publishedMessage.userId
-            } as AcknowledgeMessageParams};
+              kind:AKNOWLEDGE_MESSAGE_COMMAND,
+              temp_id:publishedMessage.tempId,
+              user_id:publishedMessage.userId
+           };
+           console.log(ackCommand);
           eventBus.publishCommand(ackCommand);
 
       };

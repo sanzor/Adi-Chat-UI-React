@@ -3,7 +3,7 @@ import { Command } from "./Command";
 
 export interface GetOlderMessagesCommand extends Command {
     kind: typeof GET_OLDER_MESSAGES_COMMAND;
-    topicId: number;
+    topic_id: number;
     startIndex: number;
     count: number;
 }

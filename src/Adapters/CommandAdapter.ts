@@ -53,6 +53,7 @@ function innerCreateCommand(data:Command): BaseCommandDto|null{
             break;
         case AKNOWLEDGE_MESSAGE_COMMAND:
             if(isAcknowledgeMessageCommand(data)){
+                console.log(data);
                 return command_acknowledge_message(data as AcknowledgeMessageCommand);
             }   
             break;
@@ -95,7 +96,7 @@ function create_command_subscribe(command:SubscribeCommand):SubscribeCommandDto{
    
     var message:UnsubscribeCommandDto={
         command:UNSUBSCRIBE_COMMAND,
-        topicId:command.topicId
+        topic_id:command.topic_id
     }
     return message;
 }
@@ -119,10 +120,10 @@ function command_publish_message(command:PublishMessageCommand):PublishCommandDt
    
     var toSend:PublishCommandDto={
         command:PUBLISH_MESSAGE_COMMAND,
-        tempId:command.message.tempId,
-        topicId:command.message.topicId,
+        temp_id:command.message.tempId,
+        topic_id:command.message.topicId,
         content:command.message.message,
-        userId:command.message.userId,
+        user_id:command.message.userId,
 
     };
     return toSend;
@@ -132,9 +133,11 @@ function command_acknowledge_message(command:AcknowledgeMessageCommand):Acknowle
    
     var toSend:AcknowledgeMessageCommandDto={
         command:AKNOWLEDGE_MESSAGE_COMMAND,
-        user_id:command.params.userId,
-        message_temp_id:command.params.tempId
+        user_id:command.user_id,
+        message_temp_id:command.temp_id
     };
+    console.log("Creating ack command");
+    console.log(JSON.stringify(toSend));
     return toSend;
 }
 
@@ -142,7 +145,7 @@ function command_get_newest_messages(command:GetNewestMessagesCommand):GetNewest
     
     var message:GetNewestMessagesCommandDto={
         command:GET_NEWEST_MESSAGES_COMMAND,
-        topicId:command.topicId,
+        topic_id:command.topic_id,
         count:command.count,
     }
     return message;
@@ -159,7 +162,7 @@ function command_get_newest_messages_for_user(command:GetNewestMessagesForUserCo
 function command_get_older_messages(command:GetOlderMessagesCommand):GetOlderMessagesCommandDto{
     var message:GetOlderMessagesCommandDto={
         command:GET_OLDER_MESSAGES_COMMAND,
-        topicId:command.topicId,
+        topicId:command.topic_id,
         startIndex:command.startIndex,
         count:command.count
     }
@@ -183,7 +186,7 @@ function isPublishMessage(command: Command): command is PublishMessageCommand {
     return command.kind === PUBLISH_MESSAGE_COMMAND;
 }
 function isAcknowledgeMessageCommand(command: Command): command is AcknowledgeMessageCommand {
-    return command.kind === PUBLISH_MESSAGE_COMMAND;
+    return command.kind === AKNOWLEDGE_MESSAGE_COMMAND;
 }
 function isDisconnectCommand(command: Command): command is DisconnectCommand {
     return command.kind === DISCONNECT_COMMAND;

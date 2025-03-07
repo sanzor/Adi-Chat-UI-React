@@ -24,6 +24,7 @@ import { PublishMessageParams } from "../Dtos/PublishMessageParams";
 import { useChannels } from "../Providers/ChannelContext";
 import { ChatProvider } from "../Providers/ChatProvider";
 import { NewMessageDto } from "../Dtos/NewMessageDto";
+import ErrorBoundary from "./ErrorBoundary";
 export interface MainComponentProps{
     onLogout:()=>void;
 }
@@ -239,11 +240,14 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
             <label id="subscribeLabel" className="subscribeLabel" >Channel</label>
             <button id="subscribeBtn" className="subscribeButton" onClick={handleSubscribe}>Subscribe</button>
         </div> 
+        <ErrorBoundary>
         <ChatProvider>
           <ChannelsComponent handleUnsubscribe={handleUnsubscribe}/>
           <ChatComponent currentChannel={currentChannel} messages={messagesByChannel[currentChannel?.id??""]}></ChatComponent>
           <ChatSendComponent handleChatSend={handleChatSend}></ChatSendComponent>
         </ChatProvider>
+        </ErrorBoundary>
+       
         
     </div>
     {/* </div> */}

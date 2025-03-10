@@ -1,10 +1,9 @@
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
 import { useEventBus } from "./EventBusContext";
 import { ChatMessage, SENDING } from "../Domain/ChatMessage";
 import { AKNOWLEDGE_MESSAGE_COMMAND, NEW_INCOMING_MESSAGE, NEW_MESSAGE_PUBLISHED, PUBLISH_MESSAGE_COMMAND } from "../Events";
 import { PublishMessageParams } from "../Dtos/PublishMessageParams";
 import { PublishMessageCommand } from "../Domain/Commands/PublishMessageCommand";
-import { v4 as uuidv4 } from 'uuid';
 import { AcknowledgeMessageCommand } from "../Domain/Commands/AcknowledgeMessageCommand";
 import { ChatMessageDto } from "../Dtos/ChatMessageDto";
 interface ChatContextType{
@@ -18,6 +17,7 @@ const ChatContext=createContext<ChatContextType|undefined>(undefined);
 export const ChatProvider:React.FC<{children:ReactNode}>=({children})=>{
     const [messagesMap, setMessagesMap] = useState<Map<number, ChatMessage[]> | null>(new Map());
     const eventBus = useEventBus();
+    const stableEventBus = useMemo(() => eventBus, []); 
     const toChatMessage=(messageDto:ChatMessageDto):ChatMessage=>{
        let chatMessage={
         tempId:messageDto.temp_id,
@@ -39,70 +39,111 @@ export const ChatProvider:React.FC<{children:ReactNode}>=({children})=>{
             const updatedMessages = new Map(prev); // Clone the existing Map
             const existingMessages = updatedMessages.get(newMessage.topicId) || [];
             updatedMessages.set(newMessage.topicId,[...existingMessages,newMessage]);
+            updatedMessages.get(newMessage.topicId);
             return updatedMessages;
         });
       };
-      const handleMessagePublished=(event:CustomEvent)=>{
-          var publishedMessage: ChatMessage = toChatMessage(event.detail as ChatMessageDto);
-          console.log("Inside handle for incoming published message ");
-          console.log(publishedMessage);
-          setMessagesMap(prev => {
-            if (!prev) return new Map([[publishedMessage.topicId, [publishedMessage]]]); // Handle initial state
-            const updatedMessages = new Map(prev); // Clone the existing Map
-            const existingMessages = updatedMessages.get(publishedMessage.topicId) || [];
-            const messageIndex=existingMessages.findIndex(msg=>msg.tempId===publishedMessage.tempId);
-            if(messageIndex===-1){
-               throw new Error("Published message should exist");  
-            };
-            existingMessages[messageIndex]={...existingMessages[messageIndex],status:publishedMessage.status,id:publishedMessage.id,created_at:publishedMessage.created_at};
-            return updatedMessages;
-          });
-          let ackCommand:AcknowledgeMessageCommand={
-              kind:AKNOWLEDGE_MESSAGE_COMMAND,
-              temp_id:publishedMessage.tempId,
-              user_id:publishedMessage.userId
-           };
-           console.log(ackCommand);
-          eventBus.publishCommand(ackCommand);
-
-      };
-    eventBus.subscribe(NEW_INCOMING_MESSAGE,handleNewIncomingMessage);
-    eventBus.subscribe(NEW_MESSAGE_PUBLISHED,handleMessagePublished);
-    return ()=>{
-        console.log("❌ ChatProvider Unmounted");
-        eventBus.unsubscribe(NEW_INCOMING_MESSAGE,handleNewIncomingMessage);
-        eventBus.unsubscribe(NEW_MESSAGE_PUBLISHED,handleMessagePublished);
-     }
-    },[eventBus]);
-    const publishMessage=(newMessage:PublishMessageParams)=>{
-        var sentMessage:ChatMessage={
-          id:null,
-          message:newMessage.message,
-          tempId:uuidv4(),
-          userId:newMessage.userId,
-          topicId:newMessage.topicId,
-          status:SENDING,
-        created_at:null};
-
+      const handleMessagePublished = (event: CustomEvent) => {
+        var publishedMessage: ChatMessage = toChatMessage(event.detail as ChatMessageDto);
+        console.log("📩 Received Published Message:", publishedMessage);
+    
         setMessagesMap(prev => {
-            if (!prev) return new Map([[sentMessage.topicId, [sentMessage]]]); // Handle initial state
-            const updatedMessages = new Map(prev); // Clone the existing Map
-            const existingMessages = updatedMessages.get(sentMessage.topicId) || [];
-            updatedMessages.set(sentMessage.topicId, [...existingMessages, sentMessage]); // Append new message
+            if (!prev) {
+                console.error("⚠️ messagesMap is null, cannot find published message.");
+                return new Map();
+            }
+    
+            const updatedMessages = new Map(prev);
+            console.log("📌 Current messagesMap:", [...updatedMessages.entries()]);
+    
+            const existingMessages = updatedMessages.get(publishedMessage.topicId) || [];
+    
+            console.log("🔍 Checking for tempId:", publishedMessage.tempId);
+            console.log("📌 Existing Messages in topic:", existingMessages.map(msg => msg.tempId));
+    
+            const messageIndex = existingMessages.findIndex(msg => msg.tempId === publishedMessage.tempId);
+    
+            console.log("🔎 Message Found At Index:", messageIndex);
+    
+            if (messageIndex === -1) {
+                console.error("❌ Error: Published message not found! TempId:", publishedMessage.tempId);
+                throw new Error("Published message should exist");
+            }
+    
+            existingMessages[messageIndex] = {
+                ...existingMessages[messageIndex],
+                status: publishedMessage.status,
+                id: publishedMessage.id,
+                created_at: publishedMessage.created_at
+            };
+    
+            updatedMessages.set(publishedMessage.topicId, [...existingMessages]);
+    
             return updatedMessages;
         });
-      
-        eventBus.publishCommand({message:newMessage,kind:PUBLISH_MESSAGE_COMMAND} as PublishMessageCommand)
+    
+        let ackCommand: AcknowledgeMessageCommand = {
+            kind: AKNOWLEDGE_MESSAGE_COMMAND,
+            temp_id: publishedMessage.tempId,
+            user_id: publishedMessage.userId
+        };
+    
+        console.log("✅ Sending ACK Command:", ackCommand);
+        stableEventBus.publishCommand(ackCommand);
     };
+    console.log("✅ Subscribing to eventBus events...");
+    stableEventBus.subscribe(NEW_INCOMING_MESSAGE,handleNewIncomingMessage);
+    stableEventBus.subscribe(NEW_MESSAGE_PUBLISHED,handleMessagePublished);
+    return ()=>{
+        console.log("❌ Unsubscribing from eventBus events...");
+        console.log("❌ ChatProvider Unmounted");
+        stableEventBus.unsubscribe(NEW_INCOMING_MESSAGE,handleNewIncomingMessage);
+        stableEventBus.unsubscribe(NEW_MESSAGE_PUBLISHED,handleMessagePublished);
+     }
+    },[stableEventBus]);
+
+
+    const publishMessage = (newMessage: PublishMessageParams) => {
+      var sentMessage: ChatMessage = {
+          id: null,
+          message: newMessage.message,
+          tempId: newMessage.tempId,
+          userId: newMessage.userId,
+          topicId: newMessage.topicId,
+          status: SENDING,
+          created_at: null
+      };
+  
+      console.log("📤 Publishing message with tempId:", sentMessage.tempId);
+  
+      setMessagesMap(prev => {
+          if (!prev) return new Map([[sentMessage.topicId, [sentMessage]]]);
+  
+          const updatedMessages = new Map(prev);
+          const existingMessages = updatedMessages.get(sentMessage.topicId) || [];
+  
+          console.log("📝 Before Adding: Messages in topic:", existingMessages);
+          
+          updatedMessages.set(sentMessage.topicId, [...existingMessages, sentMessage]); // Append new message
+  
+          console.log("✅ After Adding: Messages in topic:", updatedMessages.get(sentMessage.topicId));
+  
+          return updatedMessages;
+      });
+  
+      stableEventBus.publishCommand({ message: newMessage, kind: PUBLISH_MESSAGE_COMMAND } as PublishMessageCommand);
+  };
+  
 
     const clearUnreadMessagesForChannel = (channelId: number): number => {
       if (!messagesMap) return 0;
-  
+      
       setMessagesMap(prev => {
         if (!prev) return null;
   
         const updatedMessages = new Map(prev);
         const clearedCount = updatedMessages.get(channelId)?.length || 0;
+        console.log(`Deleting message ${channelId}`);
         updatedMessages.delete(channelId);
   
         return updatedMessages;

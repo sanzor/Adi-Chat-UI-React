@@ -9,7 +9,7 @@ import { PUBLISH_MESSAGE_COMMAND,
 import { useEventBus } from "../Providers/EventBusContext";
 import { PublishMessageCommand } from "../Domain/Commands/PublishMessageCommand";
 import { PublishMessageParams } from "../Dtos/PublishMessageParams";
-import { MessagesProvider } from "../Providers/MessagesContext";
+import { ChatActionsProvider } from "../Providers/ChatActionsContext";
 import ErrorBoundary from "./ErrorBoundary";
 import { useSubscriptions } from "../Providers/SubscriptionsContext";
 export interface MainComponentProps{
@@ -40,11 +40,11 @@ const MainComponent:React.FC<MainComponentProps> =(props)=>{
             <button id="subscribeBtn" className="subscribeButton" onClick={() => subscribeToChannel(subscribe)}>Subscribe</button>
         </div> 
         <ErrorBoundary>
-        <MessagesProvider>
+        <ChatActionsProvider>
           <ChannelsComponent/>
           <ChatComponent></ChatComponent>
           <ChatSendComponent handleChatSend={handleChatSend}></ChatSendComponent>
-        </MessagesProvider>
+        </ChatActionsProvider>
         </ErrorBoundary>
     </div>
     {/* </div> */}

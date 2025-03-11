@@ -1,14 +1,14 @@
 import React ,{} from 'react';
 import { Channel } from "../Domain/Channel";
 import '../css/channels.css'
-import { useChat } from '../Providers/MessagesContext';
+import { useChatActions } from '../Providers/ChatActionsContext';
 interface ChannelComponentProps{
     channel:Channel;
     onUnsubscribe:(channel:Channel)=>void;
     onOpenChat:(channel:Channel)=>void;
 }
 const ChannelComponent:React.FC<ChannelComponentProps>=({channel,onUnsubscribe,onOpenChat})=>{
-    const {messagesMap,clearUnreadMessagesForChannel}=useChat();
+    const {messagesMap,clearUnreadMessagesForChannel}=useChatActions();
     const unreadCount=messagesMap?.get(channel.id)?.length||0;
     const handleUnsubscribe=function(){
          onUnsubscribe(channel);

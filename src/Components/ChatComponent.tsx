@@ -1,10 +1,10 @@
 import "../css/chat.css"
-import { useChat } from "../Providers/MessagesContext";
+import { useChatActions } from "../Providers/ChatActionsContext";
 import { useSubscriptions } from "../Providers/SubscriptionsContext";
 import ChatMessageComponent, { ChatMessageStatus } from "./ChatMessageComponent";
 
 const ChatComponent:React.FC=()=>{
-    const { messagesMap } = useChat(); // ✅ Get messages from ChatProvider
+    const { messagesMap } = useChatActions(); // ✅ Get messages from ChatProvider
     const { currentChannel } = useSubscriptions(); // ✅ Get current channel
     const messages = messagesMap?.get(currentChannel?.id ?? 0) || [];
     return(

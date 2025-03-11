@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { PublishMessageParams } from "../Dtos/PublishMessageParams";
 import { useUser } from "../Providers/UserContext";
-import { useChat } from "../Providers/MessagesContext";
+import { useChatActions } from "../Providers/ChatActionsContext";
 import { useSubscriptions } from "../Providers/SubscriptionsContext";
 
 interface ChatSendComponentProps{
@@ -13,7 +13,7 @@ const ChatSendComponent:React.FC<ChatSendComponentProps>=(props)=>{
     let {user}=useUser();
     const {currentChannel}=useSubscriptions();
     const [messageText,setMessageText]=useState<string>("");
-    const {publishMessage}=useChat();
+    const {publishMessage}=useChatActions();
     const onChatSendClick=()=>{
         const tempId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         let msg:PublishMessageParams={message:messageText,tempId:tempId,topicId:currentChannel!.id,userId:user!.id};

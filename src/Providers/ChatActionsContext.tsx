@@ -9,16 +9,16 @@ import { ChatMessageDto } from "../Dtos/ChatMessageDto";
 import { GetNewestMessagesCommand } from "../Domain/Commands/GetNewestMessagesCommand";
 import { Channel } from "../Domain/Channel";
 import { useSubscriptions } from "./SubscriptionsContext";
-interface MessagesContextType{
+interface ChatActionsContextType{
     messagesMap: Map<number, ChatMessage[]> | null;
     publishMessage: (message:PublishMessageParams) => void;
     clearUnreadMessagesForChannel:(channelId:number)=>number;
     currentChannel:Channel |null;
 }
 
-const MessagesContext=createContext<MessagesContextType|undefined>(undefined);
+const ChatActionsContext=createContext<ChatActionsContextType|undefined>(undefined);
 
-export const MessagesProvider:React.FC<{children:ReactNode}>=({children})=>{
+export const ChatActionsProvider:React.FC<{children:ReactNode}>=({children})=>{
     const { currentChannel } = useSubscriptions();
     const [messagesMap, setMessagesMap] = useState<Map<number, ChatMessage[]> | null>(new Map());
     const eventBus = useEventBus();
@@ -167,13 +167,13 @@ export const MessagesProvider:React.FC<{children:ReactNode}>=({children})=>{
     };
 
       return (
-        <MessagesContext.Provider value={{ messagesMap, publishMessage ,clearUnreadMessagesForChannel,currentChannel}}>
+        <ChatActionsContext.Provider value={{ messagesMap, publishMessage ,clearUnreadMessagesForChannel,currentChannel}}>
           {children}
-        </MessagesContext.Provider>
+        </ChatActionsContext.Provider>
       );
 };
-export const useChat = () => {
-    const context = useContext(MessagesContext);
+export const useChatActions = () => {
+    const context = useContext(ChatActionsContext);
     if (!context) {
       throw new Error("useChat must be used within a ChatProvider");
     }

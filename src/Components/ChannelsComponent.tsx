@@ -1,18 +1,15 @@
 import React, { useEffect } from "react";
-import { SUBSCRIBE_COMMAND_RESULT_U,
-         SET_CHAT} from "../Events";
+import { SUBSCRIBE_COMMAND_RESULT_U} from "../Events";
 import { Channel } from "../Domain/Channel";
 import ChannelComponent from "./ChannelComponent";
 import { useEventBus } from "../Providers/EventBusContext";
 import '../css/channels.css';
-import { useChannels } from "../Providers/ChannelContext";
-export interface ChannelsComponentProps{
-    handleUnsubscribe:(channel:Channel)=>void;
-}
-const ChannelsComponent:React.FC<ChannelsComponentProps>=({
-    handleUnsubscribe})=>{
+import { useSubscriptions } from "../Providers/SubscriptionsContext";
+
+const ChannelsComponent:React.FC=()=>{
    const EventBus = useEventBus();
-   const {channels,setCurrentChannel}=useChannels();
+   const {channels,setCurrentChannel}=useSubscriptions();
+   const {unsubscribeFromChannel}=useSubscriptions();
 
     useEffect(()=>{
         EventBus.subscribe(SUBSCRIBE_COMMAND_RESULT_U,()=>{});//onSubscribeResultU);
@@ -22,16 +19,15 @@ const ChannelsComponent:React.FC<ChannelsComponentProps>=({
 
     const handleOpenChat = (channel: Channel) => {
         setCurrentChannel(channel);
-        EventBus.publishEvent(SET_CHAT, channel);
       };
 
     const internalUnsubscribe=(channel:Channel)=>{
         console.log(`Triggering unsubscribe for channel:${channel}`);
-        handleUnsubscribe(channel);
+        unsubscribeFromChannel(channel);
     };
     const handleRemoveAll=()=>{
         channels?.map(chan=>{
-            handleUnsubscribe(chan);
+            unsubscribeFromChannel(chan);
         });
     }
     return(

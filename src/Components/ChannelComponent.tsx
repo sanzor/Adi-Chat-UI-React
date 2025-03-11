@@ -1,7 +1,7 @@
 import React ,{} from 'react';
 import { Channel } from "../Domain/Channel";
 import '../css/channels.css'
-import { useChat } from '../Providers/ChatProvider';
+import { useChat } from '../Providers/MessagesContext';
 interface ChannelComponentProps{
     channel:Channel;
     onUnsubscribe:(channel:Channel)=>void;

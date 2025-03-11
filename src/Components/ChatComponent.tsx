@@ -1,16 +1,12 @@
-import { useEffect } from "react";
 import "../css/chat.css"
-import { Channel } from "../Domain/Channel";
-import { ChatMessage } from "../Domain/ChatMessage";
+import { useChat } from "../Providers/MessagesContext";
+import { useSubscriptions } from "../Providers/SubscriptionsContext";
 import ChatMessageComponent, { ChatMessageStatus } from "./ChatMessageComponent";
-export interface ChatComponentProps{
-    currentChannel:Channel|null;
-    messages:ChatMessage[];
-}
-const ChatComponent:React.FC<ChatComponentProps>=({currentChannel,messages})=>{
-        useEffect(()=>{
-            
-        },[messages]);
+
+const ChatComponent:React.FC=()=>{
+    const { messagesMap } = useChat(); // ✅ Get messages from ChatProvider
+    const { currentChannel } = useSubscriptions(); // ✅ Get current channel
+    const messages = messagesMap?.get(currentChannel?.id ?? 0) || [];
     return(
     <>
        <div id="chatPanel" className="chatPanel">

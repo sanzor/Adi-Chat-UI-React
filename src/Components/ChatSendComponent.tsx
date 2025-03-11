@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { PublishMessageParams } from "../Dtos/PublishMessageParams";
 import { useUser } from "../Providers/UserContext";
-import { useChannels } from "../Providers/ChannelContext";
-import { useChat } from "../Providers/ChatProvider";
+import { useChat } from "../Providers/MessagesContext";
+import { useSubscriptions } from "../Providers/SubscriptionsContext";
 
 interface ChatSendComponentProps{
     handleChatSend:(message:PublishMessageParams)=>void;
@@ -11,7 +11,7 @@ interface ChatSendComponentProps{
 
 const ChatSendComponent:React.FC<ChatSendComponentProps>=(props)=>{
     let {user}=useUser();
-    const {currentChannel}=useChannels();
+    const {currentChannel}=useSubscriptions();
     const [messageText,setMessageText]=useState<string>("");
     const {publishMessage}=useChat();
     const onChatSendClick=()=>{

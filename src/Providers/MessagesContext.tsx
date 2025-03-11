@@ -1,20 +1,25 @@
 import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
 import { useEventBus } from "./EventBusContext";
 import { ChatMessage, SENDING } from "../Domain/ChatMessage";
-import { AKNOWLEDGE_MESSAGE_COMMAND, NEW_INCOMING_MESSAGE, NEW_MESSAGE_PUBLISHED, PUBLISH_MESSAGE_COMMAND } from "../Events";
+import { AKNOWLEDGE_MESSAGE_COMMAND, GET_NEWEST_MESSAGES_COMMAND, NEW_INCOMING_MESSAGE, NEW_MESSAGE_PUBLISHED, PUBLISH_MESSAGE_COMMAND } from "../Events";
 import { PublishMessageParams } from "../Dtos/PublishMessageParams";
 import { PublishMessageCommand } from "../Domain/Commands/PublishMessageCommand";
 import { AcknowledgeMessageCommand } from "../Domain/Commands/AcknowledgeMessageCommand";
 import { ChatMessageDto } from "../Dtos/ChatMessageDto";
-interface ChatContextType{
+import { GetNewestMessagesCommand } from "../Domain/Commands/GetNewestMessagesCommand";
+import { Channel } from "../Domain/Channel";
+import { useSubscriptions } from "./SubscriptionsContext";
+interface MessagesContextType{
     messagesMap: Map<number, ChatMessage[]> | null;
     publishMessage: (message:PublishMessageParams) => void;
     clearUnreadMessagesForChannel:(channelId:number)=>number;
-};
+    currentChannel:Channel |null;
+}
 
-const ChatContext=createContext<ChatContextType|undefined>(undefined);
+const MessagesContext=createContext<MessagesContextType|undefined>(undefined);
 
-export const ChatProvider:React.FC<{children:ReactNode}>=({children})=>{
+export const MessagesProvider:React.FC<{children:ReactNode}>=({children})=>{
+    const { currentChannel } = useSubscriptions();
     const [messagesMap, setMessagesMap] = useState<Map<number, ChatMessage[]> | null>(new Map());
     const eventBus = useEventBus();
     const stableEventBus = useMemo(() => eventBus, []); 
@@ -29,7 +34,16 @@ export const ChatProvider:React.FC<{children:ReactNode}>=({children})=>{
         userId:messageDto.user_id
       }
       return chatMessage;
-    }
+    };
+
+    useEffect(() => {
+      if (!currentChannel) return;
+      // ✅ Fetch messages when channel changes
+      console.log(`🔄 Fetching messages for channel ${currentChannel.id}`);
+      let getcommand:GetNewestMessagesCommand={kind:GET_NEWEST_MESSAGES_COMMAND,topic_id:currentChannel!.id,count:10};
+      eventBus.publishCommand(getcommand);
+
+  }, [currentChannel, eventBus]);
     useEffect(()=>{
       const handleNewIncomingMessage = (event: CustomEvent) => {
         var newMessage: ChatMessage = toChatMessage(event.detail as ChatMessageDto);
@@ -153,13 +167,13 @@ export const ChatProvider:React.FC<{children:ReactNode}>=({children})=>{
     };
 
       return (
-        <ChatContext.Provider value={{ messagesMap, publishMessage ,clearUnreadMessagesForChannel}}>
+        <MessagesContext.Provider value={{ messagesMap, publishMessage ,clearUnreadMessagesForChannel,currentChannel}}>
           {children}
-        </ChatContext.Provider>
+        </MessagesContext.Provider>
       );
 };
 export const useChat = () => {
-    const context = useContext(ChatContext);
+    const context = useContext(MessagesContext);
     if (!context) {
       throw new Error("useChat must be used within a ChatProvider");
     }

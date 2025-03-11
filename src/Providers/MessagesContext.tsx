@@ -9,20 +9,18 @@ import { useWebSocket } from "./WebsocketContext";
 import { GetNewestMessagesForUserCommandResultDto } from "../Dtos/SocketCommandResults/GetNewestMessagesForUserResultDto";
 import { ChannelWithMessagesDto } from "../Dtos/ChannelWithMessagesDto";
 import { useSubscriptions } from "./SubscriptionsContext";
+import { ChatMessage } from "../Domain/ChatMessage";
 
-interface ChannelsContextType{
-    messagesMap: Map<number, ChannelWithMessagesDto> | null;
-    setMessagesMap: (
-      map:
-        | Map<number, ChannelWithMessagesDto> | null
-        | ((prevMap: Map<number, ChannelWithMessagesDto> | null) => Map<number, ChannelWithMessagesDto> | null)
-    ) => void;
-    updateMessageForChannel: (channelId: number, newData: ChannelWithMessagesDto) => void;
+interface MessagesContextType {
+    fetchMessagesForChannel:(channelId:number,count:number)=>ChatMessage[];
+    fetchMessagesAfter(channelId:number,lastMessageId:number,count:number):ChatMessage[];
+    refreshMessagesForChannel(channelId:number):void;
+    getMessagesForChannel(channelId:number):ChatMessage[];
 };
-const ChannelsContext=createContext<ChannelsContextType | undefined>(undefined);
+const MessagesContext=createContext<MessagesContextType | undefined>(undefined);
 
 
-export const ChannelsProvider:React.FC<{children:ReactNode}>=({children})=>{
+export const MessagesProvider:React.FC<{children:ReactNode}>=({children})=>{
     const {state:{isConnected}}=useWebSocket();
     const eventBus=useEventBus();
     const {user}=useUser();
@@ -65,15 +63,15 @@ export const ChannelsProvider:React.FC<{children:ReactNode}>=({children})=>{
       }
     },[]);
     
-    return (<ChannelsContext.Provider value={{
+    return (<MessagesContext.Provider value={{
       messagesMap,
       setMessagesMap,
       updateMessageForChannel}
-    }>{children}</ChannelsContext.Provider>);
+    }>{children}</MessagesContext.Provider>);
 };
 
 export const useChannels=()=>{
-    const context=useContext(ChannelsContext);
+    const context=useContext(MessagesContext);
     if(!context){
         throw new Error("useChannels must be used within a provider");
     }

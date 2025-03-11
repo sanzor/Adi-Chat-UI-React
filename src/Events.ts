@@ -9,8 +9,10 @@ const SELF_PUBLISH_MESSAGE_COMMAND:string="self_publish";
 const GET_OLDER_MESSAGES_COMMAND:string="get_older_messages";
 const GET_OLDER_MESSAGES_COMMAND_RESULT:string="get_older_messages_result";
 const GET_NEWEST_MESSAGES_COMMAND:string="get_newest_messages";
+const GET_MESSAGES_AFTER_COMMAND:string="get_messages_after";
 const GET_NEWEST_MESSAGES_FOR_USER_COMMAND:string="get_newest_messages_for_user";
 const GET_NEWEST_MESSAGES_COMMAND_RESULT:string="get_newest_messages_result";
+const GET_MESSAGES_AFTER_COMMAND_RESULT:string="get_messages_after_result";
 const GET_NEWEST_MESSAGES_FOR_USER_COMMAND_RESULT:string="get_newest_messages_for_user_result";
 const DISCONNECT_COMMAND:string="disconnect";
 
@@ -86,6 +88,8 @@ export {
     GET_OLDER_MESSAGES_COMMAND,
     GET_OLDER_MESSAGES_COMMAND_RESULT,
     GET_NEWEST_MESSAGES_COMMAND,
+    GET_MESSAGES_AFTER_COMMAND,
+    GET_MESSAGES_AFTER_COMMAND_RESULT,
     GET_NEWEST_MESSAGES_COMMAND_RESULT,
     GET_NEWEST_MESSAGES_FOR_USER_COMMAND,
     GET_NEWEST_MESSAGES_FOR_USER_COMMAND_RESULT,

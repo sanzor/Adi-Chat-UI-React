@@ -1,7 +1,7 @@
-import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useEventBus } from "./EventBusContext";
 import { ChatMessage, SENDING } from "../Domain/ChatMessage";
-import { AKNOWLEDGE_MESSAGE_COMMAND, GET_MESSAGES_AFTER_COMMAND, GET_MESSAGES_AFTER_COMMAND_RESULT, GET_NEWEST_MESSAGES_COMMAND, GET_NEWEST_MESSAGES_COMMAND_RESULT, NEW_INCOMING_MESSAGE, NEW_MESSAGE_PUBLISHED, PUBLISH_MESSAGE_COMMAND, VIEW_MESSAGE_COMMAND } from "../Events";
+import { AKNOWLEDGE_MESSAGE_COMMAND, GET_MESSAGES_AFTER_COMMAND, GET_MESSAGES_AFTER_COMMAND_RESULT, GET_NEWEST_MESSAGES_COMMAND, GET_NEWEST_MESSAGES_COMMAND_RESULT, GET_NEWEST_MESSAGES_MANUAL_COMMAND, NEW_INCOMING_MESSAGE, NEW_MESSAGE_PUBLISHED, PUBLISH_MESSAGE_COMMAND, VIEW_MESSAGE_COMMAND } from "../Events";
 import { PublishMessageParams } from "../Dtos/PublishMessageParams";
 import { PublishMessageCommand } from "../Domain/Commands/PublishMessageCommand";
 import { AcknowledgeMessageCommand } from "../Domain/Commands/AcknowledgeMessageCommand";
@@ -11,7 +11,6 @@ import { Channel } from "../Domain/Channel";
 import { useSubscriptions } from "./SubscriptionsContext";
 import { GetMessagesAfterCommand } from "../Domain/Commands/GetMessagesAfterCommand";
 import { MessageViewedCommand } from "../Domain/Commands/MessageViewedCommand";
-import { GetNewestMessagesCommandResultDto } from "../Dtos/SocketCommandResults/GetNewestMessagesCommandResultDto";
 
 interface ChatActionsContextType{
     messagesMap: Map<number, ChatMessage[]> | null;
@@ -44,40 +43,50 @@ export const ChatActionsProvider:React.FC<{children:ReactNode}>=({children})=>{
     };
     useEffect(()=>{
         const handleFetchMessages=(ev:CustomEvent)=>{
-          const result=ev.detail as GetNewestMessagesCommandResultDto;
+          const result=ev.detail as ChatMessageDto[]??[];
           console.log(`\nHandleFetchMessages:${result}\n`);
-          const messages = result.messages.map(toChatMessage);
+          const messages = result.map(toChatMessage);
           console.log("🔄 Received latest messages:", messages);
           appendNewMessagesToExisting(currentChannel?.id!, messages);  
         };
         const handleFetchMessagesAfter=(ev:CustomEvent)=>{
-          const result=ev.detail as GetNewestMessagesCommandResultDto;
+          const result=ev.detail as ChatMessageDto[]??[];
           console.log(`\nHandleFetchAfterMessages:${result}\n`);
-          const messages = result.messages.map(toChatMessage);
+          const messages = result.map(toChatMessage);
           console.log("🔄 Received latest messages:", messages);
           appendNewMessagesToExisting(currentChannel?.id!, messages);  
         }
         stableEventBus.subscribe(GET_NEWEST_MESSAGES_COMMAND_RESULT,handleFetchMessages);
         stableEventBus.subscribe(GET_MESSAGES_AFTER_COMMAND_RESULT,handleFetchMessagesAfter);
+        stableEventBus.subscribe(GET_NEWEST_MESSAGES_MANUAL_COMMAND,(ev:CustomEvent)=>{
+            const data:{channelId:number}=ev.detail;
+            fetchMessagesForChannel(data.channelId,10);
+        });
         return ()=>{
           console.log("❌ Unsubscribing from eventBus events...");
           stableEventBus.unsubscribe(GET_NEWEST_MESSAGES_COMMAND_RESULT,handleFetchMessages);
           stableEventBus.unsubscribe(GET_MESSAGES_AFTER_COMMAND_RESULT,handleFetchMessagesAfter);
         }
-    });
+    },[]);
   
-    const fetchMessagesForChannel = (channelId: number, count: number)=> {
-      stableEventBus.publishCommand({ kind: GET_NEWEST_MESSAGES_COMMAND, topic_id: channelId, count } as GetNewestMessagesCommand);
-    };  // ✅ Dependencies: Only changes when `eventBus` updates
-
-    const fetchMessagesAfter = (channelId: number, lastMessageId: number, count: number)=> {
-      stableEventBus.publishCommand({
-          kind: GET_MESSAGES_AFTER_COMMAND,
-          topic_id: channelId,
-          from_message_id: lastMessageId,
-          count
-        } as GetMessagesAfterCommand);
-      }
+        // ✅ Fetch messages for a channel (memoized)
+        const fetchMessagesForChannel = useCallback((channelId: number, count: number) => {
+          stableEventBus.publishCommand({
+              kind: GET_NEWEST_MESSAGES_COMMAND,
+              topic_id: channelId,
+              count
+          } as GetNewestMessagesCommand);
+      }, [stableEventBus]);
+  
+      // ✅ Fetch messages after a specific message
+      const fetchMessagesAfter = useCallback((channelId: number, lastMessageId: number, count: number) => {
+          stableEventBus.publishCommand({
+              kind: GET_MESSAGES_AFTER_COMMAND,
+              topic_id: channelId,
+              from_message_id: lastMessageId,
+              count
+          } as GetMessagesAfterCommand);
+      }, [stableEventBus]);
 
       /**
    * ✅ Update messages in state (Ensuring correct order)

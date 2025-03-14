@@ -8,8 +8,7 @@ import { useSubscriptions } from "../Providers/SubscriptionsContext";
 
 const ChannelsComponent:React.FC=()=>{
    const EventBus = useEventBus();
-   const {channels,setCurrentChannel}=useSubscriptions();
-   const {unsubscribeFromChannel}=useSubscriptions();
+   const {channels,unsubscribeFromChannel,openChannel}=useSubscriptions();
 
     useEffect(()=>{
         EventBus.subscribe(SUBSCRIBE_COMMAND_RESULT_U,()=>{});//onSubscribeResultU);
@@ -18,7 +17,7 @@ const ChannelsComponent:React.FC=()=>{
 // Only depend on EventBus and setChannels
 
     const handleOpenChat = (channel: Channel) => {
-        setCurrentChannel(channel);
+        openChannel(channel);
       };
 
     const internalUnsubscribe=(channel:Channel)=>{

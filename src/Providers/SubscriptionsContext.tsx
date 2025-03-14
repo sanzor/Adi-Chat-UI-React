@@ -1,6 +1,8 @@
-import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from "react";
+import { createContext, useContext, useState, ReactNode, useEffect, useCallback, useMemo } from "react";
 import { useEventBus } from "../Providers/EventBusContext";
 import { 
+    GET_NEWEST_MESSAGES_COMMAND,
+    GET_NEWEST_MESSAGES_MANUAL_COMMAND,
     SUBSCRIBE_COMMAND, 
     SUBSCRIBE_COMMAND_RESULT_COMPONENT, 
     UNSUBSCRIBE_COMMAND, 
@@ -26,7 +28,7 @@ interface SubscriptionContextType {
     unsubscribeFromChannel: (channel: Channel) => Promise<void>;
     currentChannel:Channel |null;
     channels: Channel[];
-    setCurrentChannel:(channel:Channel)=>void;
+    openChannel:(channel:Channel)=>void;
     refreshChannels:()=>Promise<Channel[]>;
 };
 
@@ -34,6 +36,7 @@ const SubscriptionContext = createContext<SubscriptionContextType | undefined>(u
 
 export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const eventBus = useEventBus();
+     const stableEventBus = useMemo(() => eventBus, []); 
     const {user}=useUser();
     const [channels,setChannels]=useState<Channel[]>(()=>{
             const storedChannels=getItemFromStorage<Channel[]>(CHANNELS);
@@ -105,11 +108,11 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
             const subscribeResult = await new Promise<SubscribeCommandResultDto>((resolve) => {
                 const onSubscribeResult = (ev: CustomEvent) => {
                     console.log(`Subscription result: ${JSON.stringify(ev.detail)}`);
-                    eventBus.unsubscribe(SUBSCRIBE_COMMAND_RESULT_COMPONENT, onSubscribeResult);
+                    stableEventBus.unsubscribe(SUBSCRIBE_COMMAND_RESULT_COMPONENT, onSubscribeResult);
                     resolve(ev.detail as SubscribeCommandResultDto);
                 };
-                eventBus.subscribe(SUBSCRIBE_COMMAND_RESULT_COMPONENT, onSubscribeResult);
-                eventBus.publishCommand({ kind: SUBSCRIBE_COMMAND, topic: channelName } as SubscribeCommand);
+                stableEventBus.subscribe(SUBSCRIBE_COMMAND_RESULT_COMPONENT, onSubscribeResult);
+                stableEventBus.publishCommand({ kind: SUBSCRIBE_COMMAND, topic: channelName } as SubscribeCommand);
             });
 
             processSubscribeResult(subscribeResult);
@@ -179,9 +182,20 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
             return unsubscribeResult.subscriptions;
         });
     };
+    const openChannel=useCallback((channel:Channel) => {
+        setCurrentChannel(channel);
+        stableEventBus.publishEvent(GET_NEWEST_MESSAGES_MANUAL_COMMAND,{channelId:channel.id});
+    },[]);
 
     return (
-        <SubscriptionContext.Provider value={{ subscribeToChannel, unsubscribeFromChannel , currentChannel ,channels,setCurrentChannel, refreshChannels}}>
+        <SubscriptionContext.Provider value={{
+             subscribeToChannel,
+              unsubscribeFromChannel ,
+               currentChannel ,
+               channels,
+               openChannel,
+                refreshChannels,
+                }}>
             {children}
         </SubscriptionContext.Provider>
     );

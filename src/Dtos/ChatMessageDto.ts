@@ -1,6 +1,6 @@
 
 export interface ChatMessageDto{
-    id:string|null;
+    id:number|null;
     temp_id:string;
     user_id:number;
     topic_id:number;

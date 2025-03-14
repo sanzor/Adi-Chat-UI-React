@@ -22,7 +22,9 @@ import {
     GET_NEWEST_MESSAGES_FOR_USER_COMMAND_RESULT,
     NEW_MESSAGE,
     MESSAGE_PUBLISHED,
-    NEW_MESSAGE_PUBLISHED
+    NEW_MESSAGE_PUBLISHED,
+    GET_NEWEST_MESSAGES_COMMAND_RESULT,
+    GET_MESSAGES_AFTER_COMMAND_RESULT
 } from "../Events";
 
 export class MessageService {
@@ -88,7 +90,7 @@ export class MessageService {
         this.handleGetNewestMessagesForUserCommandResult(data.result);
         break;
       case GET_OLDER_MESSAGES_COMMAND:
-        this.handleGetOlderMessagesCommandResult(data.result);
+        this.handleGetMessagesAfter(data.result);
         break;
       default:
         console.warn("Unknown command result:", data.command);
@@ -118,7 +120,7 @@ export class MessageService {
 
   private handleGetNewestMessagesCommandResult(data: any) {
     console.log("Newest messages received:", data.messages);
-    this.eventBus.publishEvent("getNewestMessages", data.messages);
+    this.eventBus.publishEvent(GET_NEWEST_MESSAGES_COMMAND_RESULT, data.messages);
   }
 
   private handleGetNewestMessagesForUserCommandResult(data: any) {
@@ -126,8 +128,8 @@ export class MessageService {
     this.eventBus.publishEvent(GET_NEWEST_MESSAGES_FOR_USER_COMMAND_RESULT, data);
   }
 
-  private handleGetOlderMessagesCommandResult(data: any) {
-    console.log("Older messages received:", data.result);
-    this.eventBus.publishEvent("getOlderMessages", data.result);
+  private handleGetMessagesAfter(data: any) {
+    console.log(`Get messages after received${data.result}`);
+    this.eventBus.publishEvent(GET_MESSAGES_AFTER_COMMAND_RESULT, data.result);
   }
 }

@@ -70,7 +70,7 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
             setItemInStorage(CURRENT_CHANNEL,currentChannel);
         },[currentChannel]);
 
-        const refreshChannels = useCallback(async (): Promise<Channel[]> => {
+    const refreshChannels = useCallback(async (): Promise<Channel[]> => {
             let previousChannels = channels; 
         
             try {

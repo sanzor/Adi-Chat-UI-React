@@ -5,10 +5,12 @@ import ChannelComponent from "./ChannelComponent";
 import { useEventBus } from "../Providers/EventBusContext";
 import '../css/channels.css';
 import { useSubscriptions } from "../Providers/SubscriptionsContext";
+import { useChatActions } from "../Providers/ChatActionsContext";
 
 const ChannelsComponent:React.FC=()=>{
    const EventBus = useEventBus();
    const {channels,unsubscribeFromChannel,openChannel}=useSubscriptions();
+   const {fetchMessagesForChannel}=useChatActions();
 
     useEffect(()=>{
         EventBus.subscribe(SUBSCRIBE_COMMAND_RESULT_U,()=>{});//onSubscribeResultU);
@@ -18,6 +20,7 @@ const ChannelsComponent:React.FC=()=>{
 
     const handleOpenChat = (channel: Channel) => {
         openChannel(channel);
+        fetchMessagesForChannel(channel.id,10);
       };
 
     const internalUnsubscribe=(channel:Channel)=>{

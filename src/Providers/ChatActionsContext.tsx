@@ -1,7 +1,7 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useEventBus } from "./EventBusContext";
 import { ChatMessage, SENDING } from "../Domain/ChatMessage";
-import { AKNOWLEDGE_MESSAGE_COMMAND, GET_MESSAGES_AFTER_COMMAND, GET_MESSAGES_AFTER_COMMAND_RESULT, GET_NEWEST_MESSAGES_COMMAND, GET_NEWEST_MESSAGES_COMMAND_RESULT, GET_NEWEST_MESSAGES_MANUAL_COMMAND, NEW_INCOMING_MESSAGE, NEW_MESSAGE_PUBLISHED, PUBLISH_MESSAGE_COMMAND, VIEW_MESSAGE_COMMAND } from "../Events";
+import { AKNOWLEDGE_MESSAGE_COMMAND, GET_MESSAGES_AFTER_COMMAND, GET_MESSAGES_AFTER_COMMAND_RESULT, GET_NEWEST_MESSAGES_COMMAND, GET_NEWEST_MESSAGES_COMMAND_RESULT, NEW_INCOMING_MESSAGE, NEW_MESSAGE_PUBLISHED, PUBLISH_MESSAGE_COMMAND, VIEW_MESSAGE_COMMAND } from "../Events";
 import { PublishMessageParams } from "../Dtos/PublishMessageParams";
 import { PublishMessageCommand } from "../Domain/Commands/PublishMessageCommand";
 import { AcknowledgeMessageCommand } from "../Domain/Commands/AcknowledgeMessageCommand";
@@ -58,10 +58,6 @@ export const ChatActionsProvider:React.FC<{children:ReactNode}>=({children})=>{
         }
         stableEventBus.subscribe(GET_NEWEST_MESSAGES_COMMAND_RESULT,handleFetchMessages);
         stableEventBus.subscribe(GET_MESSAGES_AFTER_COMMAND_RESULT,handleFetchMessagesAfter);
-        stableEventBus.subscribe(GET_NEWEST_MESSAGES_MANUAL_COMMAND,(ev:CustomEvent)=>{
-            const data:{channelId:number}=ev.detail;
-            fetchMessagesForChannel(data.channelId,10);
-        });
         return ()=>{
           console.log("❌ Unsubscribing from eventBus events...");
           stableEventBus.unsubscribe(GET_NEWEST_MESSAGES_COMMAND_RESULT,handleFetchMessages);

@@ -1,8 +1,6 @@
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback, useMemo } from "react";
 import { useEventBus } from "../Providers/EventBusContext";
 import { 
-    GET_NEWEST_MESSAGES_COMMAND,
-    GET_NEWEST_MESSAGES_MANUAL_COMMAND,
     SUBSCRIBE_COMMAND, 
     SUBSCRIBE_COMMAND_RESULT_COMPONENT, 
     UNSUBSCRIBE_COMMAND, 
@@ -184,7 +182,7 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
     };
     const openChannel=useCallback((channel:Channel) => {
         setCurrentChannel(channel);
-        stableEventBus.publishEvent(GET_NEWEST_MESSAGES_MANUAL_COMMAND,{channelId:channel.id});
+        // stableEventBus.publishEvent(GET_NEWEST_MESSAGES_MANUAL_COMMAND,{channelId:channel.id});
     },[]);
 
     return (

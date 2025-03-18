@@ -1,7 +1,7 @@
 import "../css/chat.css"
 import { useChatActions } from "../Providers/ChatActionsContext";
 import { useSubscriptions } from "../Providers/SubscriptionsContext";
-import ChatMessageComponent, { ChatMessageStatus } from "./ChatMessageComponent";
+import ChatMessageComponent from "./ChatMessageComponent";
 
 const ChatComponent:React.FC=()=>{
     const { messagesMap } = useChatActions(); // ✅ Get messages from ChatProvider
@@ -19,7 +19,6 @@ const ChatComponent:React.FC=()=>{
                                     <ChatMessageComponent 
                                         key={msg.id || msg.tempId}
                                         chatMessage={msg} 
-                                        status={msg.status === "sent" ? ChatMessageStatus.Sent : ChatMessageStatus.Pending}
                                     />
                                 ))}
                          </div>

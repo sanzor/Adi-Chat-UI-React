@@ -34,7 +34,7 @@ export const ChatActionsProvider:React.FC<{children:ReactNode}>=({children})=>{
         tempId:messageDto.temp_id,
         created_at:messageDto.created_at ? Number(messageDto.created_at) : Date.now(),
         id:messageDto.id,
-        message:messageDto.message,
+        message:messageDto.content,
         status:messageDto.status,
         topicId:messageDto.topic_id,
         userId:messageDto.user_id
@@ -102,24 +102,6 @@ export const ChatActionsProvider:React.FC<{children:ReactNode}>=({children})=>{
         });
     };
 
-  const replaceTempMessage = (channelId: number, tempId: string, newMessage: ChatMessage) => {
-    setMessagesMap(prev => {
-        if (!prev) return new Map();
-
-        const updatedMessages = new Map(prev);
-        const existingMessages = updatedMessages.get(channelId) || [];
-
-        const messageIndex = existingMessages.findIndex(msg => msg.tempId === tempId);
-        if (messageIndex === -1) {
-          console.error("❌ Message with tempId not found:", tempId);
-          return prev;
-        }
-        existingMessages[messageIndex] = newMessage;
-        updatedMessages.set(channelId, [...existingMessages]);
-
-        return updatedMessages;
-      });
-    };
     useEffect(() => {
       if (!currentChannel) return;
       console.log(`🔄 Fetching messages for channel ${currentChannel.id}`);

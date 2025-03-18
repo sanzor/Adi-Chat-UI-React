@@ -15,10 +15,13 @@ const ChatComponent:React.FC=()=>{
                           </div>
                          <div id="messagesContainer" className="chatScroll">
                               <button id="loadOlderMessagesBtn"> Load older messages</button>
-                              {Array.isArray(messages) && messages.map(msg=>(
-                                <ChatMessageComponent chatMessage={msg} status={ChatMessageStatus.Pending}>
-
-                              </ChatMessageComponent>))}
+                              {Array.isArray(messages) && messages.map(msg => (
+                                    <ChatMessageComponent 
+                                        key={msg.id || msg.tempId}
+                                        chatMessage={msg} 
+                                        status={msg.status === "sent" ? ChatMessageStatus.Sent : ChatMessageStatus.Pending}
+                                    />
+                                ))}
                          </div>
         </div>
     </>

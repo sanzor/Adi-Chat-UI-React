@@ -127,84 +127,93 @@ export const ChatActionsProvider:React.FC<{children:ReactNode}>=({children})=>{
     }, [currentChannel, fetchMessagesForChannel]);  // ✅ `fetchMessagesForChannel` is stable, so `useEffect` won't trigger unnecessarily
 
 
-    useEffect(()=>{
+    useEffect(() => {
       const handleNewIncomingMessage = (event: CustomEvent) => {
-        var newMessage: ChatMessage = toChatMessage(event.detail as ChatMessageDto);
-        console.log(newMessage);
+        const newMessage: ChatMessage = toChatMessage(event.detail as ChatMessageDto);
+        console.log("📥 Incoming newMessage:", newMessage);
         setMessagesMap(prev => {
-            if (!prev) return new Map([[newMessage.topicId, [newMessage]]]); // Handle initial state
-            const updatedMessages = new Map(prev); // Clone the existing Map
-            const existingMessages = updatedMessages.get(newMessage.topicId) || [];
-            updatedMessages.set(newMessage.topicId,[...existingMessages,newMessage]);
-            updatedMessages.get(newMessage.topicId);
-            return updatedMessages;
+          if (!prev) return new Map([[newMessage.topicId, [newMessage]]]);
+          const updated = new Map(prev);
+          const existing = updated.get(newMessage.topicId) || [];
+          updated.set(newMessage.topicId, [...existing, newMessage]);
+          return updated;
         });
       };
+    
       const handleMessagePublished = (event: CustomEvent) => {
-        var publishedMessage: ChatMessage = toChatMessage(event.detail as ChatMessageDto);
+        const publishedMessage: ChatMessage = toChatMessage(event.detail as ChatMessageDto);
         console.log("📩 Received Published Message:", publishedMessage);
-      
-        replaceTempMessage(
-          publishedMessage.topicId,
-          publishedMessage.tempId!,
-          {
-            ...publishedMessage, // Copy the published message
-            tempId: null // Remove tempId as it's no longer needed
+    
+        // Replace temp message with real one
+        setMessagesMap(prev => {
+          if (!prev) return new Map();
+          const updated = new Map(prev);
+          const messages = updated.get(publishedMessage.topicId) || [];
+          const index = messages.findIndex(m => m.tempId === publishedMessage.tempId);
+          if (index !== -1) {
+            messages[index] = { ...publishedMessage, tempId: null };
+            updated.set(publishedMessage.topicId, [...messages]);
           }
-        );
-      
-        // ✅ Send ACK to server
-        let ackCommand: AcknowledgeMessageCommand = {
+          return updated;
+        });
+    
+        // ACK
+        const ackCommand: AcknowledgeMessageCommand = {
           kind: AKNOWLEDGE_MESSAGE_COMMAND,
           temp_id: publishedMessage.tempId!,
           user_id: publishedMessage.userId
         };
-      
         console.log("✅ Sending ACK Command:", ackCommand);
-        eventBus.publishCommand(ackCommand);
+        stableEventBus.publishCommand(ackCommand);
       };
-      console.log("✅ Subscribing to eventBus events...");
-      stableEventBus.subscribe(NEW_INCOMING_MESSAGE,handleNewIncomingMessage);
-      stableEventBus.subscribe(NEW_MESSAGE_PUBLISHED,handleMessagePublished);
-      return ()=>{
-        console.log("❌ Unsubscribing from eventBus events...");
-        console.log("❌ ChatProvider Unmounted");
-        stableEventBus.unsubscribe(NEW_INCOMING_MESSAGE,handleNewIncomingMessage);
-        stableEventBus.unsubscribe(NEW_MESSAGE_PUBLISHED,handleMessagePublished);
-      }
-    },[stableEventBus]);
-
-
+    
+      console.log("✅ Subscribing to events...");
+      stableEventBus.subscribe(NEW_INCOMING_MESSAGE, handleNewIncomingMessage);
+      stableEventBus.subscribe(NEW_MESSAGE_PUBLISHED, handleMessagePublished);
+    
+      return () => {
+        console.log("❌ Cleaning up events...");
+        stableEventBus.unsubscribe(NEW_INCOMING_MESSAGE, handleNewIncomingMessage);
+        stableEventBus.unsubscribe(NEW_MESSAGE_PUBLISHED, handleMessagePublished);
+      };
+    }, []); // ✅ Empty dependencies: safe because eventBus is stable and handlers are stable
     const publishMessage = (newMessage: PublishMessageParams) => {
-      var sentMessage: ChatMessage = {
+      console.log("🚀 Incoming newMessage:", newMessage);
+    
+      const sentMessage: ChatMessage = {
           id: null,
           message: newMessage.message,
           tempId: newMessage.tempId,
           userId: newMessage.userId,
           topicId: newMessage.topicId,
           status: SENDING,
-          created_at:0
+          created_at: 0
       };
-  
-      console.log("📤 Publishing message with tempId:", sentMessage.tempId);
-  
+    
+      console.log("📤 SentMessage BEFORE state update:", sentMessage);
+    
       setMessagesMap(prev => {
-          if (!prev) return new Map([[sentMessage.topicId, [sentMessage]]]);
-  
-          const updatedMessages = new Map(prev);
-          const existingMessages = updatedMessages.get(sentMessage.topicId) || [];
-  
-          console.log("📝 Before Adding: Messages in topic:", existingMessages);
-          
-          updatedMessages.set(sentMessage.topicId, [...existingMessages, sentMessage]); // Append new message
-  
-          console.log("✅ After Adding: Messages in topic:", updatedMessages.get(sentMessage.topicId));
-  
-          return updatedMessages;
-      });
-  
-      stableEventBus.publishCommand({ message: newMessage, kind: PUBLISH_MESSAGE_COMMAND } as PublishMessageCommand);
+        if (!prev) return new Map([[sentMessage.topicId, [{ ...sentMessage }]]]);
+    
+        const updatedMessages = new Map(prev);
+        const existingMessages = updatedMessages.get(sentMessage.topicId) || [];
+    
+        updatedMessages.set(sentMessage.topicId, [...existingMessages, { ...sentMessage }]);
+    
+        console.log("✅ After Adding to Map:", updatedMessages.get(sentMessage.topicId));
+    
+        return updatedMessages;
+    });
+    
+      console.log("📬 Publishing to eventBus:", { message: newMessage });
+    
+      stableEventBus.publishCommand({ 
+        message: newMessage, 
+        kind: PUBLISH_MESSAGE_COMMAND 
+      } as PublishMessageCommand);
+      console.log("📌 sentMessage STILL correct after eventBus publish:", sentMessage);
     };
+
     const markMessageAsViewed = (channelId: number, messageId: number) => {
       eventBus.publishCommand({
         kind: VIEW_MESSAGE_COMMAND,
